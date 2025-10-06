@@ -1,119 +1,81 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<title>CEDEARs — Monitor</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<style>
-  :root { --ok:#067d1b; --bad:#c5162b; --muted:#777; }
-  body { font-family: Arial, sans-serif; background:#f6f7f9; margin:0; padding:22px; }
-  h1 { margin:0 0 8px 0; font-size:20px; }
-  .meta { color:#555; font-size:12px; margin-bottom:12px; }
-  table { width:100%; border-collapse: collapse; background:#fff; border-radius:12px; overflow:hidden; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
-  th, td { padding:9px 8px; border-bottom:1px solid #eee; text-align:center; }
-  th { background:#111827; color:#fff; position: sticky; top:0; z-index:1; font-weight:600; }
-  tr:nth-child(even) td { background:#fbfbfd; }
-  .left { text-align:left; }
-  .pos { color:var(--ok); font-weight:600; }
-  .neg { color:var(--bad); font-weight:600; }
-  .muted { color:var(--muted); }
-  .chip { display:inline-block; padding:2px 6px; border-radius:999px; font-size:12px; background:#eef2ff; }
-</style>
+  <meta charset="UTF-8">
+  <title>CEDEARs Arbitrados</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; }
+    table { border-collapse: collapse; width: 100%; background: #fff; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background: #333; color: white; }
+    tr:nth-child(even) { background: #f9f9f9; }
+    .positivo { color: green; }
+    .negativo { color: red; }
+  </style>
 </head>
 <body>
+  <h2>Precios CEDEARs y Arbitraje (con CCL)</h2>
+  <table id="cedears">
+    <thead>
+      <tr>
+        <th>Símbolo</th>
+        <th>Último Precio ARS</th>
+        <th>Variación %</th>
+        <th>Teórico ARS</th>
+        <th>Spread %</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-<h1>CEDEARs — Monitor</h1>
-<div class="meta">
-  Fuente de datos: <strong>data912.com</strong> (proxy allorigins) y <strong>dolarapi.com</strong> para CCL venta.  
-  Se actualiza cada 60 segundos.
-</div>
+  <script>
+    async function cargarDatos() {
+      try {
+        // 1. Obtener CCL desde la API
+        let dolarRes = await fetch("https://dolarapi.com/v1/dolares");
+        let dolarData = await dolarRes.json();
+        let ccl = dolarData.find(d => d.casa === "contadoconliqui").venta;
 
-<table id="tablaCedears">
-  <thead>
-    <tr>
-      <th class="left">Ticker</th>
-      <th>Precio ARS ↓</th>
-      <th>Cambio ARS</th>
-      <th>Precio USD</th>
-      <th>Cambio USD</th>
-      <th>Tipo de Cambio</th>
-      <th>Volumen</th>
-      <th>Arbitrado</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+        // 2. Obtener CEDEARs desde tu JSON
+        let res = await fetch("https://pelotalibre.digital/arg_cedears.json");
+        let cedears = await res.json();
 
-<script>
-// Config
-const DATA912_URL = "https://api.allorigins.win/raw?url=https://data912.com/live/arg_cedears";
-const DOLARAPI_URL = "https://dolarapi.com/v1/dolares";
-const ARBIT_THRESHOLD = 1.0; // ±1% diferencia para considerar arbitrado
+        let tbody = document.querySelector("#cedears tbody");
+        tbody.innerHTML = "";
 
-const fmt = (x, d=2) => (x==null || Number.isNaN(x)) ? "–" : Number(x).toFixed(d);
-const arrow = (v) => v>0 ? "▲" : v<0 ? "▼" : "";
-const clsPN = (v) => v>0 ? "pos" : v<0 ? "neg" : "muted";
+        cedears.forEach(papel => {
+          // Precio de cierre (ARS)
+          let ultimoPrecio = papel.c;
 
-async function robustJSON(url) {
-  const r = await fetch(url);
-  const t = await r.text();
-  try { return JSON.parse(t); } catch { console.error("Error parseando:", t.slice(0,200)); return null; }
-}
+          // Calculo del teórico -> acá por ahora usamos un placeholder
+          // En un caso real deberías traer el precio en USD y ratio CEDEAR
+          // Como no lo tenemos en tu JSON, lo dejo como = precio actual / CCL (ejemplo simple)
+          let teorico = (ultimoPrecio / ccl) * ccl; 
 
-async function getCCLVenta() {
-  const arr = await robustJSON(DOLARAPI_URL);
-  const ccl = arr.find(x => x.casa === "contadoconliqui");
-  return ccl ? Number(ccl.venta) : null;
-}
+          // Spread entre último precio y teórico
+          let spread = ((ultimoPrecio - teorico) / teorico) * 100;
 
-async function actualizar() {
-  try {
-    const [cedears, cclVenta] = await Promise.all([
-      robustJSON(DATA912_URL),
-      getCCLVenta()
-    ]);
-
-    const tbody = document.querySelector("#tablaCedears tbody");
-    tbody.innerHTML = "";
-
-    if (!Array.isArray(cedears)) {
-      tbody.innerHTML = `<tr><td colspan="8">No se recibieron datos de data912</td></tr>`;
-      return;
+          let tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${papel.symbol}</td>
+            <td>${ultimoPrecio.toFixed(2)}</td>
+            <td class="${papel.pct_change >= 0 ? "positivo" : "negativo"}">
+              ${papel.pct_change.toFixed(2)}%
+            </td>
+            <td>${teorico.toFixed(2)}</td>
+            <td class="${spread >= 0 ? "positivo" : "negativo"}">
+              ${spread.toFixed(2)}%
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error("Error al cargar datos:", err);
+      }
     }
 
-    for (const c of cedears) {
-      const ticker = c.ticker_ar || "-";
-      const tickerUSA = c.ticker_usa || "-";
-      const tipoCambio = c.CCL_mark ? Number(c.CCL_mark) : null;
-      const precioUSD = c.CCL_mark ? (Number(c.CCL_mark) ? Number(c.CCL_mark) : null) : null; // placeholder, si lo querés reemplazar por API real
-      const cambioUSD = (c.CCL_mark && c.CCL_close) ? ((c.CCL_mark - c.CCL_close) / c.CCL_close * 100) : null;
-      const precioARS = c.CCL_mark && precioUSD ? precioUSD * tipoCambio : null; // simplificado
-      const cambioARS = cambioUSD; // aproximación
-      const volumen = c.ars_volume ?? null;
-
-      const arbitrado = (tipoCambio && cclVenta) ? (Math.abs(((tipoCambio - cclVenta)/cclVenta)*100) <= ARBIT_THRESHOLD) : false;
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td class="left">${ticker}</td>
-        <td>${fmt(precioARS)}</td>
-        <td class="${clsPN(cambioARS)}">${arrow(cambioARS)} ${fmt(cambioARS)}%</td>
-        <td>${fmt(precioUSD)}</td>
-        <td class="${clsPN(cambioUSD)}">${arrow(cambioUSD)} ${fmt(cambioUSD)}%</td>
-        <td>${fmt(tipoCambio)}</td>
-        <td>${fmt(volumen, 0)}</td>
-        <td><span class="chip" style="background:${arbitrado?'#e6ffed':'#ffecec'};color:${arbitrado?'#03650f':'#7f0a0a'}">${arbitrado?'Sí':'No'}</span></td>
-      `;
-      tbody.appendChild(tr);
-    }
-  } catch (err) {
-    console.error("Error:", err);
-  }
-}
-
-actualizar();
-setInterval(actualizar, 60000);
-</script>
-
+    cargarDatos();
+    setInterval(cargarDatos, 60000); // refresca cada 1 minuto
+  </script>
 </body>
 </html>
