@@ -16,17 +16,16 @@
 <body>
 
 <h1>Monitor de CEDEARs y Arbitraje</h1>
-<p>Datos actualizados automáticamente desde <strong>dolarapi.com</strong> y <strong>data912.com</strong></p>
+<p>Datos actualizados desde <strong>dolarapi.com</strong> y <strong>data912.com</strong></p>
 
 <table>
   <thead>
     <tr>
       <th>Ticker</th>
-      <th>Precio ARS</th>
-      <th>Cambio ARS</th>
-      <th>Tipo de Cambio Implícito</th>
-      <th>Spread vs CCL</th>
-      <th>Volumen</th>
+      <th>Tipo de Cambio (CCL_mark)</th>
+      <th>Cambio CCL %</th>
+      <th>Spread vs CCL Venta</th>
+      <th>Volumen ARS</th>
       <th>Arbitrado</th>
     </tr>
   </thead>
@@ -41,30 +40,35 @@ async function loadCedears() {
     const dolarData = await dolarRes.json();
     const cclVenta = dolarData.find(d => d.casa === "contadoconliqui").venta;
 
-    // Obtener CEDEARs desde data912
+    // Obtener CEDEARs desde data912 (pasando por proxy allorigins)
     const res = await fetch("https://api.allorigins.win/raw?url=https://data912.com/live/arg_cedears");
     const data = await res.json();
 
     const tbody = document.getElementById("cedearTable");
     tbody.innerHTML = "";
 
-    data.forEach(item => {
-      const ticker = item.ticker_ar;
-      const cclMark = Number(item.CCL_mark);
-      const cclClose = Number(item.CCL_close);
-      const cambioARS = cclClose ? ((cclMark - cclClose) / cclClose) * 100 : 0;
+    data.forEach(cedear => {
+      const ticker = cedear.ticker_ar || cedear.ticker_usa || "-";
+      const cclMark = Number(cedear.CCL_mark) || 0;
+      const cclClose = Number(cedear.CCL_close) || 0;
+      const volumen = Number(cedear.ars_volume) || 0;
+
+      // Cambio % entre CCL actual y cierre
+      const cambioCCL = cclClose ? ((cclMark - cclClose) / cclClose) * 100 : 0;
+
+      // Spread vs CCL venta
       const spread = cclVenta ? ((cclMark - cclVenta) / cclVenta) * 100 : 0;
-      const volumen = item.ars_volume || 0;
-      const arbitrado = Math.abs(spread) < 1; // ±1% margen
+
+      // Arbitrado: dentro de ±1%
+      const arbitrado = Math.abs(spread) <= 1;
 
       const row = document.createElement("tr");
       row.innerHTML = `
         <td>${ticker}</td>
         <td>${cclMark.toFixed(2)}</td>
-        <td class="${cambioARS >= 0 ? "positivo" : "negativo"}">
-          ${cambioARS >= 0 ? "▲" : "▼"} ${cambioARS.toFixed(2)}%
+        <td class="${cambioCCL >= 0 ? "positivo" : "negativo"}">
+          ${cambioCCL >= 0 ? "▲" : "▼"} ${cambioCCL.toFixed(2)}%
         </td>
-        <td>${cclMark.toFixed(2)}</td>
         <td class="${spread >= 0 ? "positivo" : "negativo"}">${spread.toFixed(2)}%</td>
         <td>${volumen.toLocaleString()}</td>
         <td>${arbitrado ? "Sí" : "No"}</td>
@@ -73,13 +77,12 @@ async function loadCedears() {
     });
 
     console.log("CCL Venta:", cclVenta);
-
   } catch (error) {
     console.error("Error al cargar datos:", error);
   }
 }
 
-// Ejecutar al inicio y refrescar cada 1 minuto
+// Ejecutar al inicio y refrescar cada 60 segundos
 loadCedears();
 setInterval(loadCedears, 60000);
 </script>
