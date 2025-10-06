@@ -2,136 +2,88 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>CEDEARs — Monitor</title>
+  <title>CEDEARs — Monitor Data912</title>
   <style>
     body { font-family: Arial, sans-serif; background:#f9f9f9; padding:20px; }
-    table { border-collapse: collapse; width:100%; background:#fff; font-size:14px; }
-    th, td { border:1px solid #ddd; padding:8px; text-align:center; }
+    table { border-collapse: collapse; width:100%; font-size:14px; background:#fff; }
+    th, td { border:1px solid #ccc; padding:6px; text-align:center; }
     th { background:#333; color:#fff; }
-    tr:nth-child(even) td { background:#fafafa; }
-    .pos { color: #0a7d11; font-weight:600; }
-    .neg { color: #c5162b; font-weight:600; }
-    .muted { color:#777; }
-    .left { text-align:left; }
-    #err { color:#c5162b; margin:8px 0 0; font-size:13px; }
+    tr:nth-child(even){ background:#f4f4f4; }
+    .positivo{ color:green; font-weight:bold; }
+    .negativo{ color:red; font-weight:bold; }
   </style>
 </head>
 <body>
 
-<h1>CEDEARs — Monitor</h1>
-<p>Fuentes: <strong>data912.com/live/arg_cedears</strong> (tipo de cambio implícito y volumen) + <strong>dolarapi.com</strong> (CCL venta). Refresco cada 60s.</p>
-<div id="err"></div>
+<h1>Monitor CEDEARs — Data912</h1>
+<p>Datos desde <strong>data912.com/live/arg_cedears</strong> y <strong>dolarapi.com</strong>. Actualiza cada 20 s.</p>
 
-<table id="t">
+<table>
   <thead>
     <tr>
-      <th class="left">Ticker</th>
-      <th>Precio ARS ↓</th>
-      <th>Cambio ARS</th>
-      <th>Precio USD</th>
-      <th>Cambio USD</th>
-      <th>Tipo de Cambio</th>
-      <th>Volumen</th>
+      <th>Ticker</th>
+      <th>Tipo de Cambio (CCL_mark)</th>
+      <th>Cambio % (vs CCL_close)</th>
+      <th>Spread vs CCL venta</th>
+      <th>Volumen ARS</th>
       <th>Arbitrado</th>
     </tr>
   </thead>
-  <tbody></tbody>
+  <tbody id="tabla"></tbody>
 </table>
 
 <script>
-const DOLARAPI_URL = "https://dolarapi.com/v1/dolares";
-const DATA912_URL  = "https://data912.com/live/arg_cedears"; // directo, sin proxies
-const ARBIT_THRESH_PCT = 1.0; // ±1%
-
-const $tbody = document.querySelector("#t tbody");
-const $err   = document.querySelector("#err");
-
-const fmt = (x, d=2) => (x==null || Number.isNaN(Number(x))) ? "–" : Number(x).toFixed(d);
-const arrow = (v) => (v>0 ? "▲" : (v<0 ? "▼" : ""));
-const clsPN = (v) => v>0 ? "pos" : (v<0 ? "neg" : "muted");
-
-async function fetchJSON(url) {
-  const r = await fetch(url);
-  // Algunos servidores responden con JSON válido aunque el header no sea application/json
-  const txt = await r.text();
-  try { return JSON.parse(txt); }
-  catch(e) {
-    console.error("Respuesta no JSON de", url, txt.slice(0,200));
-    throw new Error("La respuesta no es JSON válido: " + url);
-  }
+async function obtenerJSON(url){
+  const res = await fetch(url);
+  const texto = await res.text();
+  try { return JSON.parse(texto); }
+  catch(e){ console.error("Error al parsear JSON:", e, texto.slice(0,100)); return null; }
 }
 
-async function getCCLVenta() {
-  const arr = await fetchJSON(DOLARAPI_URL);
-  const ccl = Array.isArray(arr) ? arr.find(x => x.casa === "contadoconliqui") : null;
-  return ccl ? Number(ccl.venta) : null;
-}
-
-function getCCLFromRow(row) {
-  // Preferimos CCL_mark; si no viene, promedio bid/ask; si no, null
-  if (row.CCL_mark != null) return Number(row.CCL_mark);
-  if (row.CCL_bid != null && row.CCL_ask != null) return (Number(row.CCL_bid) + Number(row.CCL_ask)) / 2;
-  if (row.CCL_bid != null) return Number(row.CCL_bid);
-  if (row.CCL_ask != null) return Number(row.CCL_ask);
-  return null;
-}
-
-async function refresh() {
-  $err.textContent = "";
+async function cargar(){
   try {
-    const [cclVenta, data] = await Promise.all([getCCLVenta(), fetchJSON(DATA912_URL)]);
-    if (!Array.isArray(data) || data.length === 0) {
-      $tbody.innerHTML = `<tr><td colspan="8" class="muted">Sin datos de data912.</td></tr>`;
+    // obtener CCL venta
+    const dolarData = await obtenerJSON("https://dolarapi.com/v1/dolares");
+    const cclVenta = dolarData.find(d=>d.casa==="contadoconliqui").venta;
+
+    // obtener CEDEARs
+    const data = await obtenerJSON("https://data912.com/live/arg_cedears");
+    const tbody = document.getElementById("tabla");
+    tbody.innerHTML = "";
+
+    if(!data || !Array.isArray(data)){
+      tbody.innerHTML = `<tr><td colspan="6">Sin datos válidos de Data912</td></tr>`;
       return;
     }
 
-    $tbody.innerHTML = "";
-    for (const row of data) {
-      // Campos esperados por data912:
-      // ticker_usa, ticker_ar, CCL_bid, CCL_ask, CCL_close, CCL_mark, ars_volume, ...
-      const ticker = (row.ticker_ar || row.ticker_usa || "").toString();
-      const tc     = getCCLFromRow(row); // Tipo de cambio implícito
-      const tcClose= row.CCL_close != null ? Number(row.CCL_close) : null;
-      const volARS = row.ars_volume != null ? Number(row.ars_volume) : null;
+    data.forEach(papel=>{
+      const ticker = papel.ticker_ar || papel.ticker_usa || "-";
+      const mark   = Number(papel.CCL_mark)||0;
+      const close  = Number(papel.CCL_close)||0;
+      const vol    = Number(papel.ars_volume)||0;
 
-      // Cambio CCL (%) = (tc - tcClose)/tcClose
-      const cambioCCL = (tc!=null && tcClose!=null && tcClose!==0) ? ((tc - tcClose)/tcClose)*100 : null;
+      const cambio = close ? ((mark-close)/close)*100 : 0;
+      const spread = cclVenta ? ((mark-cclVenta)/cclVenta)*100 : 0;
+      const arbitrado = Math.abs(spread) <= 1; // dentro de ±1%
 
-      // Spread vs CCL venta (%)
-      const spread = (tc!=null && cclVenta!=null && cclVenta!==0) ? ((tc - cclVenta)/cclVenta)*100 : null;
-
-      // Arbitrado si |spread| <= umbral
-      const arbitrado = (spread!=null) ? Math.abs(spread) <= ARBIT_THRESH_PCT : false;
-
-      // NOTA: Data912 no trae Precio ARS del CEDEAR ni Precio USD del subyacente -> mostramos "–"
-      const precioArs  = null; // Se requiere otra fuente para CEDEAR last en ARS
-      const cambioArs  = null; // Idem (var % del CEDEAR en ARS)
-      const precioUsd  = null; // Se requiere otra fuente (USA)
-      const cambioUsd  = null; // Idem
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td class="left">${ticker || "–"}</td>
-        <td>${fmt(precioArs)}</td>
-        <td class="${clsPN(cambioArs)}">${cambioArs==null ? "–" : (arrow(cambioArs)+" "+fmt(cambioArs,2)+"%")}</td>
-        <td>${fmt(precioUsd)}</td>
-        <td class="${clsPN(cambioUsd)}">${cambioUsd==null ? "–" : (arrow(cambioUsd)+" "+fmt(cambioUsd,2)+"%")}</td>
-        <td>${fmt(tc)}</td>
-        <td>${volARS==null ? "–" : volARS.toLocaleString()}</td>
-        <td><span class="${arbitrado?'pos':'neg'}">${arbitrado ? 'Sí' : 'No'}</span></td>
+      const fila = document.createElement("tr");
+      fila.innerHTML = `
+        <td>${ticker}</td>
+        <td>${mark.toFixed(2)}</td>
+        <td class="${cambio>=0?"positivo":"negativo"}">${cambio>=0?"▲":"▼"} ${cambio.toFixed(2)}%</td>
+        <td class="${spread>=0?"positivo":"negativo"}">${spread.toFixed(2)}%</td>
+        <td>${vol.toLocaleString()}</td>
+        <td>${arbitrado?"Sí":"No"}</td>
       `;
-      $tbody.appendChild(tr);
-    }
-  } catch(err) {
-    console.error(err);
-    $err.textContent = "No pude leer los datos. Detalle en consola.";
-    // Pintamos una fila placeholder para que no quede la tabla vacía
-    $tbody.innerHTML = `<tr><td colspan="8" class="muted">Error al cargar. Revisá la consola (F12).</td></tr>`;
+      tbody.appendChild(fila);
+    });
+  } catch(err){
+    console.error("Error general:", err);
   }
 }
 
-refresh();
-setInterval(refresh, 60000);
+cargar();
+setInterval(cargar,20000);
 </script>
 
 </body>
