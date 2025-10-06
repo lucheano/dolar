@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Monitor de CEDEARs</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+  th { background: #f4f4f4; }
+  .arbitrado { background-color: #d4edda; } /* verde */
+  .no-arbitrado { background-color: #f8d7da; } /* rojo */
+</style>
+</head>
+<body>
+
+<h1>Monitor de CEDEARs y Arbitraje</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>CEDEAR</th>
+      <th>Precio CEDEAR $</th>
+      <th>Precio acción US$</th>
+      <th>Ratio</th>
+      <th>Tipo cambio implícito</th>
+      <th>Dólar CCL</th>
+      <th>Arbitrado?</th>
+      <th>Var. Pesos %</th>
+      <th>Var. USD %</th>
+    </tr>
+  </thead>
+  <tbody id="cedearTable"></tbody>
+</table>
+
+<script>
+// Datos externos simulados
+const dolarCCL = 335; // Dólar CCL actual
+const ratios = { "AAL": 1 }; // Ratio CEDEAR:Acción, ajustar según CEDEAR
+const preciosAccionUSD = { "AAL": 27 }; // Precio acción subyacente en USD
+
+async function loadCedears() {
+    // Simulamos fetch de JSON
+    // Podría ser: const res = await fetch('cedears.json'); const data = await res.json();
+    const data = [
+        {"symbol":"AAL","c":9055,"pct_change":2.89}
+    ];
+
+    const tbody = document.getElementById('cedearTable');
+    tbody.innerHTML = '';
+
+    data.forEach(cedear => {
+        const ratio = ratios[cedear.symbol] || 1;
+        const precioUSD = preciosAccionUSD[cedear.symbol] || 1;
+        const tipoCambioImpl = (cedear.c * ratio) / precioUSD;
+        const arbitrado = tipoCambioImpl > dolarCCL ? 'Sí' : 'No';
+        
+        // Variación USD aproximada a partir de pct_change en pesos
+        const variacionPesos = cedear.pct_change;
+        const variacionUSD = ((precioUSD - precioUSD / (1 + variacionPesos/100)) / (precioUSD / (1 + variacionPesos/100))) * 100;
+
+        const row = document.createElement('tr');
+        row.className = arbitrado === 'Sí' ? 'arbitrado' : 'no-arbitrado';
+        row.innerHTML = `
+            <td>${cedear.symbol}</td>
+            <td>${cedear.c.toFixed(2)}</td>
+            <td>${precioUSD.toFixed(2)}</td>
+            <td>${ratio}</td>
+            <td>${tipoCambioImpl.toFixed(2)}</td>
+            <td>${dolarCCL}</td>
+            <td>${arbitrado}</td>
+            <td>${variacionPesos.toFixed(2)}</td>
+            <td>${variacionUSD.toFixed(2)}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Cargar al iniciar
+loadCedears();
+// Actualizar cada 30 segundos
+setInterval(loadCedears, 30000);
+</script>
+
+</body>
+</html>
