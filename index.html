@@ -2,138 +2,101 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Monitor CEDEARs Avanzado</title>
+  <title>Monitor de CEDEARs</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
-    table { border-collapse: collapse; width: 100%; background: #fff; }
+    body { font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; font-size: 14px; background: #fff; }
     th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
     th { background: #333; color: #fff; }
-    .positivo { color: green; }
-    .negativo { color: red; }
-    .flecha { font-weight: bold; }
+    tr:nth-child(even) { background-color: #f4f4f4; }
+    .positivo { color: green; font-weight: bold; }
+    .negativo { color: red; font-weight: bold; }
   </style>
 </head>
 <body>
-  <h1>CEDEARs — Arbitraje y Cambios</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>Símbolo</th>
-        <th>Precio ARS</th>
-        <th>Precio USD</th>
-        <th>Ratio</th>
-        <th>Teórico ARS</th>
-        <th>Spread %</th>
-        <th>Cambio ARS</th>
-        <th>Cambio USD</th>
-      </tr>
-    </thead>
-    <tbody id="tablaCedears"></tbody>
-  </table>
 
-  <script>
-    // Función para obtener datos de CEDEARs desde data912
-    async function fetchCedears() {
-      const resp = await fetch("https://data912.com/live/arg_cedears");
-      const cedears = await resp.json();
-      return cedears;
-    }
+<h1>Monitor de CEDEARs y Arbitraje</h1>
+<p>Datos actualizados automáticamente desde <strong>dolarapi.com</strong> y <strong>pelotalibre.digital</strong></p>
 
-    // Función para obtener precios en USD de las acciones subyacentes
-    // Podés usar alguna API tipo Yahoo Finance o similar
-    async function fetchUSDPrice(symbol) {
-      // Ejemplo ficticio: llamamos a tu backend que obtiene el precio en USD
-      const resp = await fetch(`/api/usd-price?symbol=${symbol}`);
-      const data = await resp.json();
-      // data debe tener: { price: ..., previousClose: ... }
-      return data;
-    }
+<table>
+  <thead>
+    <tr>
+      <th>Símbolo</th>
+      <th>Precio CEDEAR $</th>
+      <th>Precio acción US$</th>
+      <th>Teórico ARS</th>
+      <th>Spread %</th>
+      <th>Variación %</th>
+    </tr>
+  </thead>
+  <tbody id="cedearTable"></tbody>
+</table>
 
-    // Función para obtener CCL (venta) desde dolarapi
-    async function fetchCCL() {
-      const resp = await fetch("https://dolarapi.com/v1/dolares");
-      const arr = await resp.json();
-      const obj = arr.find(d => d.casa === "contadoconliqui");
-      return obj ? obj.venta : null;
-    }
+<script>
+async function loadCedears() {
+  try {
+    // Obtener CCL (venta)
+    const dolarRes = await fetch("https://dolarapi.com/v1/dolares");
+    const dolarData = await dolarRes.json();
+    const ccl = dolarData.find(d => d.casa === "contadoconliqui").venta;
 
-    // Supongamos que tenemos un JSON con los ratios (podés mantenerlo tú mismo o tener un endpoint)
-    async function fetchRatios() {
-      const resp = await fetch("/api/cedear-ratios"); 
-      // debería devolver un objeto tipo { "AAPL": 10, "VISA": 18, ... }
-      const ratios = await resp.json();
-      return ratios;
-    }
+    // Obtener CEDEARs
+    const res = await fetch("https://data912.com/live/arg_cedears");
+    const data = await res.json();
 
-    // Función para armar la tabla
-    async function actualizarTabla() {
-      try {
-        const cedears = await fetchCedears();
-        const ccl = await fetchCCL();
-        const ratios = await fetchRatios();
+    // Tabla
+    const tbody = document.getElementById("cedearTable");
+    tbody.innerHTML = "";
 
-        const tbody = document.getElementById("tablaCedears");
-        tbody.innerHTML = "";
+    // Diccionario de precios en USD (temporal, luego se puede automatizar con Yahoo Finance)
+    const preciosAccionUSD = {
+      "AAPL": 225, "AAL": 27, "ABBV": 150, "MSFT": 420, "TSLA": 255
+    };
 
-        for (let cedear of cedears) {
-          const symbol = cedear.symbol;
-          const precioARS = cedear.c;  // precio actual en ARS
-          const pct_change_ars = cedear.pct_change; // cambio % en ARS
+    // Diccionario de ratios (temporal)
+    const ratios = {
+      "AAPL": 10, "AAL": 5, "ABBV": 20, "MSFT": 5, "TSLA": 15
+    };
 
-          // Obtener el precio en USD actual y previo
-          const usdData = await fetchUSDPrice(symbol);
-          const precioUSD = usdData.price;
-          const prevUSD = usdData.previousClose;
+    data.forEach(cedear => {
+      const symbol = cedear.symbol;
+      const precioARS = cedear.c;
+      const variacion = cedear.pct_change;
 
-          // Ratio para este CEDEAR
-          const ratio = ratios[symbol] || 1;
+      const precioUSD = preciosAccionUSD[symbol] || 0;
+      const ratio = ratios[symbol] || 1;
 
-          // Cálculo del teórico en ARS
-          const teoricoARS = precioUSD * ccl / ratio;
+      let teoricoARS = 0;
+      let spread = 0;
 
-          // Spread % entre ARS real y teórico
-          const spread = ( (precioARS - teoricoARS) / teoricoARS ) * 100;
-
-          // Cambios en ARS: ya tenés pct_change_ars
-          const cambioARS = pct_change_ars;
-
-          // Cambio USD: ((precioUSD - prevUSD) / prevUSD) * 100
-          let cambioUSD = 0;
-          if (prevUSD && prevUSD > 0) {
-            cambioUSD = ((precioUSD - prevUSD) / prevUSD) * 100;
-          }
-
-          // Flechita para ARS
-          const flechaARS = cambioARS > 0 ? "▲" : (cambioARS < 0 ? "▼" : "");
-          // Flechita para USD
-          const flechaUSD = cambioUSD > 0 ? "▲" : (cambioUSD < 0 ? "▼" : "");
-
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${symbol}</td>
-            <td>${precioARS.toFixed(2)}</td>
-            <td>${precioUSD.toFixed(2)}</td>
-            <td>${ratio}:1</td>
-            <td>${teoricoARS.toFixed(2)}</td>
-            <td class="${spread >= 0 ? "positivo" : "negativo"}">${spread.toFixed(2)}%</td>
-            <td class="${cambioARS >= 0 ? "positivo" : "negativo"}">
-              ${flechaARS} ${cambioARS.toFixed(2)}%
-            </td>
-            <td class="${cambioUSD >= 0 ? "positivo" : "negativo"}">
-              ${flechaUSD} ${cambioUSD.toFixed(2)}%
-            </td>
-          `;
-          tbody.appendChild(tr);
-        }
-
-      } catch (err) {
-        console.error("Error al actualizar tabla:", err);
+      if (precioUSD > 0) {
+        teoricoARS = precioUSD * ccl / ratio;
+        spread = ((precioARS - teoricoARS) / teoricoARS) * 100;
       }
-    }
 
-    // Al iniciar y refrescar cada 60 segundos
-    actualizarTabla();
-    setInterval(actualizarTabla, 60000);
-  </script>
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${symbol}</td>
+        <td>${precioARS.toFixed(2)}</td>
+        <td>${precioUSD > 0 ? precioUSD.toFixed(2) : "-"}</td>
+        <td>${teoricoARS > 0 ? teoricoARS.toFixed(2) : "-"}</td>
+        <td class="${spread >= 0 ? "positivo" : "negativo"}">${spread.toFixed(2)}%</td>
+        <td class="${variacion >= 0 ? "positivo" : "negativo"}">${variacion.toFixed(2)}%</td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    console.log("CCL Venta:", ccl);
+
+  } catch (error) {
+    console.error("Error al cargar datos:", error);
+  }
+}
+
+// Ejecutar al inicio y refrescar cada 1 minuto
+loadCedears();
+setInterval(loadCedears, 60000);
+</script>
+
 </body>
 </html>
