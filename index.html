@@ -1,111 +1,173 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Monitor de CEDEARs</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px; }
-    table { border-collapse: collapse; width: 100%; font-size: 14px; background: #fff; }
-    th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
-    th { background: #333; color: #fff; }
-    tr:nth-child(even) { background-color: #f4f4f4; }
-    .positivo { color: green; font-weight: bold; }
-    .negativo { color: red; font-weight: bold; }
-  </style>
+<meta charset="UTF-8" />
+<title>CEDEARs — Arbitraje y Cambios</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root { --ok:#0a7d11; --bad:#c5162b; --muted:#777; }
+  body { font-family: Arial, system-ui, -apple-system, sans-serif; background:#f6f7f9; margin:0; padding:24px; }
+  h1 { margin:0 0 10px 0; font-size:20px; }
+  .meta { color:#555; font-size:13px; margin-bottom:14px; }
+  table { width:100%; border-collapse: collapse; background:#fff; border-radius:12px; overflow:hidden; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+  th, td { padding:10px 8px; border-bottom:1px solid #eee; text-align:center; }
+  th { background:#111827; color:#fff; position: sticky; top:0; z-index:1; }
+  tr:nth-child(even) td { background:#fbfbfd; }
+  .pos { color: var(--ok); font-weight: 600; }
+  .neg { color: var(--bad); font-weight: 600; }
+  .muted { color: var(--muted); }
+  .pill { font-size:12px; padding:2px 6px; border-radius:999px; background:#eef2ff; }
+  .right { text-align:right; }
+  .left { text-align:left; }
+  .small { font-size:12px; color:#666; }
+  .footer-note { margin-top:10px; font-size:12px; color:#666; }
+</style>
 </head>
 <body>
 
-<h1>Monitor de CEDEARs y Arbitraje</h1>
-<p>Datos actualizados desde <strong>data912.com</strong>, <strong>dolarapi.com</strong> y <strong>Yahoo Finance</strong></p>
+<h1>CEDEARs — Arbitraje y Cambios</h1>
+<div class="meta">Fuente CEDEARs: data912 · CCL ref: dolarapi · USD: Yahoo (si disponible). Se actualiza cada 60s.</div>
 
-<table>
+<table id="t">
   <thead>
     <tr>
-      <th>Símbolo</th>
-      <th>Precio CEDEAR $</th>
-      <th>Precio acción US$</th>
-      <th>Teórico ARS</th>
-      <th>Spread %</th>
-      <th>Cambio ARS</th>
+      <th class="left">Ticker AR</th>
+      <th class="left">Ticker USA</th>
+      <th>Precio USD</th>
       <th>Cambio USD</th>
+      <th>CCL implícito</th>
+      <th>Spread vs CCL (venta)</th>
+      <th>Cambio ARS (est.)</th>
     </tr>
   </thead>
-  <tbody id="cedearTable"></tbody>
+  <tbody></tbody>
 </table>
 
+<div class="footer-note">
+  “Cambio ARS (est.)” = Δ%USD + Δ%CCL (del papel, CCL_mark vs CCL_close). Sin uso de ratio.
+</div>
+
 <script>
-async function getYahooPrice(symbol) {
-  try {
-    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    const quote = data.quoteResponse.result[0];
-    return {
-      price: quote.regularMarketPrice,
-      prevClose: quote.regularMarketPreviousClose
-    };
-  } catch {
-    return { price: 0, prevClose: 0 };
+(function(){
+  const DATA912_URL = "https://data912.com/live/arg_cedears";
+  const DOLARES_URL = "https://dolarapi.com/v1/dolares";
+  const YH_BATCH_SIZE = 45; // seguro
+
+  const $tbody = document.querySelector("#t tbody");
+
+  const fmtNum = (x, d=2) => (x===null || x===undefined || Number.isNaN(x)) ? "–" : Number(x).toFixed(d);
+  const arrow = (v) => (v>0 ? "▲" : (v<0 ? "▼" : ""));
+  const clsPN = (v) => v>0 ? "pos" : (v<0 ? "neg" : "muted");
+  const safePct = (num, den) => (den && den!==0) ? (num/den)*100 : null;
+
+  // Normaliza símbolos para Yahoo (BRK.B -> BRK-B, BF.B -> BF-B, etc.)
+  const toYahoo = (sym) => (sym || "").replace(/\./g, "-").replace(/\//g, "-").trim();
+
+  async function fetchCCLVenta() {
+    const r = await fetch(DOLARES_URL);
+    const arr = await r.json();
+    const ccl = arr.find(x => x.casa === "contadoconliqui");
+    return ccl ? Number(ccl.venta) : null;
   }
-}
 
-async function loadCedears() {
-  try {
-    // Obtener CCL venta
-    const dolarRes = await fetch("https://dolarapi.com/v1/dolares");
-    const dolarData = await dolarRes.json();
-    const ccl = dolarData.find(d => d.casa === "contadoconliqui").venta;
+  async function fetchData912() {
+    const r = await fetch(DATA912_URL);
+    return await r.json(); // array de objetos
+  }
 
-    // Obtener CEDEARs
-    const res = await fetch("https://data912.com/live/arg_cedears");
-    const data = await res.json();
+  async function fetchYahooBatch(symbols) {
+    const url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + encodeURIComponent(symbols.join(","));
+    const r = await fetch(url);
+    const j = await r.json();
+    const out = {};
+    (j?.quoteResponse?.result || []).forEach(q => {
+      out[(q.symbol||"").toUpperCase()] = {
+        price: (q.regularMarketPrice ?? null),
+        prevClose: (q.regularMarketPreviousClose ?? null)
+      };
+    });
+    return out;
+  }
 
-    const tbody = document.getElementById("cedearTable");
-    tbody.innerHTML = "";
+  async function fetchYahooMany(usSymbolsRaw) {
+    const uniq = Array.from(new Set(usSymbolsRaw.map(s => toYahoo(s).toUpperCase()).filter(Boolean)));
+    const chunks = [];
+    for (let i=0;i<uniq.length;i+=YH_BATCH_SIZE) chunks.push(uniq.slice(i, i+YH_BATCH_SIZE));
+    const maps = await Promise.all(chunks.map(fetchYahooBatch));
+    // merge
+    const final = {};
+    for (const m of maps) Object.assign(final, m);
+    return final;
+  }
 
-    for (const cedear of data) {
-      const symbol = cedear.symbol;
-      const precioARS = cedear.c;
-      const cambioARS = cedear.pct_change;
+  async function refresh() {
+    try {
+      // 1) CCL venta ref
+      const cclRef = await fetchCCLVenta();
 
-      // Obtener precio USD desde Yahoo Finance
-      const usdData = await getYahooPrice(symbol);
-      const precioUSD = usdData.price;
-      const prevUSD = usdData.prevClose;
+      // 2) Lista data912
+      const rows = await fetchData912();
 
-      // Calcular cambio USD
-      const cambioUSD = prevUSD > 0 ? ((precioUSD - prevUSD) / prevUSD) * 100 : 0;
+      // 3) Yahoo para USD (solo si tenemos ticker_usa)
+      const usList = rows.map(r => r.ticker_usa).filter(Boolean);
+      const yhQuotes = await fetchYahooMany(usList);
 
-      // Calcular teórico (precioUSD * CCL)
-      const teoricoARS = precioUSD * ccl;
+      // 4) Render
+      $tbody.innerHTML = "";
 
-      // Spread entre real y teórico
-      const spread = ((precioARS - teoricoARS) / teoricoARS) * 100;
+      for (const r of rows) {
+        const tUSAraw = r.ticker_usa || "";
+        const tAR = r.ticker_ar || "";
+        const tUSAyh = toYahoo(tUSAraw).toUpperCase();
 
-      // Flechas de cambio
-      const flechaARS = cambioARS > 0 ? "▲" : cambioARS < 0 ? "▼" : "";
-      const flechaUSD = cambioUSD > 0 ? "▲" : cambioUSD < 0 ? "▼" : "";
+        // CCL implícito del papel (preferimos mark; si no, promedio de bid/ask)
+        const cclMark = (r.CCL_mark != null) ? Number(r.CCL_mark) :
+                        (r.CCL_bid != null && r.CCL_ask != null) ? (Number(r.CCL_bid)+Number(r.CCL_ask))/2 :
+                        (r.CCL_bid ?? r.CCL_ask ?? null);
 
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${symbol}</td>
-        <td>${precioARS.toFixed(2)}</td>
-        <td>${precioUSD > 0 ? precioUSD.toFixed(2) : "-"}</td>
-        <td>${teoricoARS.toFixed(2)}</td>
-        <td class="${spread >= 0 ? "positivo" : "negativo"}">${spread.toFixed(2)}%</td>
-        <td class="${cambioARS >= 0 ? "positivo" : "negativo"}">${flechaARS} ${cambioARS.toFixed(2)}%</td>
-        <td class="${cambioUSD >= 0 ? "positivo" : "negativo"}">${flechaUSD} ${cambioUSD.toFixed(2)}%</td>
-      `;
-      tbody.appendChild(row);
+        // Spread vs CCL ref venta
+        const spread = (cclRef && cclMark) ? ((cclMark - cclRef) / cclRef) * 100 : null;
+
+        // ΔCCL implícito del papel (para estimar ΔARS)
+        const cclClose = (r.CCL_close != null) ? Number(r.CCL_close) : null;
+        const dCCL_pct = (cclMark && cclClose && cclClose !== 0) ? ((cclMark - cclClose)/cclClose)*100 : null;
+
+        // Yahoo USD
+        const q = yhQuotes[tUSAyh] || {};
+        const pxUSD = (q.price != null) ? Number(q.price) : null;
+        const prevUSD = (q.prevClose != null) ? Number(q.prevClose) : null;
+        const dUSD_pct = (pxUSD && prevUSD && prevUSD !== 0) ? ((pxUSD - prevUSD)/prevUSD)*100 : null;
+
+        // Cambio ARS estimado = ΔUSD + ΔCCL (del mismo papel)
+        const dARS_est = (dUSD_pct != null && dCCL_pct != null) ? (dUSD_pct + dCCL_pct) : null;
+
+        // Flechas
+        const aUSD = arrow(dUSD_pct ?? 0);
+        const aARS = arrow(dARS_est ?? 0);
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="left">${tAR || "–"}</td>
+          <td class="left">${tUSAraw || "–"}</td>
+          <td>${pxUSD != null ? fmtNum(pxUSD,2) : "–"}</td>
+          <td class="${clsPN(dUSD_pct ?? 0)}">${dUSD_pct != null ? `${aUSD} ${fmtNum(dUSD_pct,2)}%` : "–"}</td>
+          <td>${cclMark != null ? fmtNum(cclMark,2) : "–"}</td>
+          <td class="${clsPN(spread ?? 0)}">${spread != null ? `${fmtNum(spread,2)}%` : "–"}</td>
+          <td class="${clsPN(dARS_est ?? 0)}">${dARS_est != null ? `${aARS} ${fmtNum(dARS_est,2)}%` : "–"}</td>
+        `;
+        $tbody.appendChild(tr);
+      }
+
+    } catch (e) {
+      console.error("Error al actualizar:", e);
+      $tbody.innerHTML = `<tr><td colspan="7" class="muted">No se pudieron cargar los datos.</td></tr>`;
     }
-  } catch (err) {
-    console.error("Error cargando datos:", err);
   }
-}
 
-// Ejecutar al iniciar y refrescar cada minuto
-loadCedears();
-setInterval(loadCedears, 60000);
+  // Primera carga + refresco
+  refresh();
+  setInterval(refresh, 60000);
+})();
 </script>
 
 </body>
