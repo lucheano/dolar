@@ -2,11 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<title>CEDEARs — Arbitraje y Cambios</title>
+<title>CEDEARs — CCL y Arbitraje</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   :root { --ok:#0a7d11; --bad:#c5162b; --muted:#777; }
-  body { font-family: Arial, system-ui, -apple-system, sans-serif; background:#f6f7f9; margin:0; padding:24px; }
+  body { font-family: Arial, sans-serif; background:#f6f7f9; margin:0; padding:24px; }
   h1 { margin:0 0 10px 0; font-size:20px; }
   .meta { color:#555; font-size:13px; margin-bottom:14px; }
   table { width:100%; border-collapse: collapse; background:#fff; border-radius:12px; overflow:hidden; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
@@ -16,158 +16,99 @@
   .pos { color: var(--ok); font-weight: 600; }
   .neg { color: var(--bad); font-weight: 600; }
   .muted { color: var(--muted); }
-  .pill { font-size:12px; padding:2px 6px; border-radius:999px; background:#eef2ff; }
-  .right { text-align:right; }
   .left { text-align:left; }
-  .small { font-size:12px; color:#666; }
-  .footer-note { margin-top:10px; font-size:12px; color:#666; }
 </style>
 </head>
 <body>
 
-<h1>CEDEARs — Arbitraje y Cambios</h1>
-<div class="meta">Fuente CEDEARs: data912 · CCL ref: dolarapi · USD: Yahoo (si disponible). Se actualiza cada 60s.</div>
+<h1>CEDEARs — CCL y Arbitraje</h1>
+<div class="meta">Datos: <strong>data912.com</strong> + <strong>dolarapi.com</strong>. Actualización cada 60s.</div>
 
-<table id="t">
+<table id="tablaCedears">
   <thead>
     <tr>
       <th class="left">Ticker AR</th>
       <th class="left">Ticker USA</th>
-      <th>Precio USD</th>
-      <th>Cambio USD</th>
       <th>CCL implícito</th>
-      <th>Spread vs CCL (venta)</th>
-      <th>Cambio ARS (est.)</th>
+      <th>Spread vs CCL venta</th>
+      <th>Cambio CCL implícito</th>
     </tr>
   </thead>
   <tbody></tbody>
 </table>
 
-<div class="footer-note">
-  “Cambio ARS (est.)” = Δ%USD + Δ%CCL (del papel, CCL_mark vs CCL_close). Sin uso de ratio.
-</div>
-
 <script>
-(function(){
-  const DATA912_URL = "https://data912.com/live/arg_cedears";
-  const DOLARES_URL = "https://dolarapi.com/v1/dolares";
-  const YH_BATCH_SIZE = 45; // seguro
+async function robustJSON(url) {
+  const r = await fetch(url);
+  const txt = await r.text();
+  let parsed;
+  try { parsed = JSON.parse(txt); }
+  catch(e){ console.error("Error parseando JSON:", e, txt.slice(0,100)); return null; }
+  if (Array.isArray(parsed)) return parsed;
+  if (parsed && Array.isArray(parsed.data)) return parsed.data;
+  return null;
+}
 
-  const $tbody = document.querySelector("#t tbody");
+async function fetchCCLVenta() {
+  const data = await robustJSON("https://dolarapi.com/v1/dolares");
+  if (!data) return null;
+  const ccl = data.find(x => x.casa === "contadoconliqui");
+  return ccl ? Number(ccl.venta) : null;
+}
 
-  const fmtNum = (x, d=2) => (x===null || x===undefined || Number.isNaN(x)) ? "–" : Number(x).toFixed(d);
-  const arrow = (v) => (v>0 ? "▲" : (v<0 ? "▼" : ""));
-  const clsPN = (v) => v>0 ? "pos" : (v<0 ? "neg" : "muted");
-  const safePct = (num, den) => (den && den!==0) ? (num/den)*100 : null;
+async function fetchCedears() {
+  return await robustJSON("https://data912.com/live/arg_cedears");
+}
 
-  // Normaliza símbolos para Yahoo (BRK.B -> BRK-B, BF.B -> BF-B, etc.)
-  const toYahoo = (sym) => (sym || "").replace(/\./g, "-").replace(/\//g, "-").trim();
+function flecha(valor) {
+  if (valor > 0) return "▲";
+  if (valor < 0) return "▼";
+  return "";
+}
 
-  async function fetchCCLVenta() {
-    const r = await fetch(DOLARES_URL);
-    const arr = await r.json();
-    const ccl = arr.find(x => x.casa === "contadoconliqui");
-    return ccl ? Number(ccl.venta) : null;
-  }
+function colorClase(valor) {
+  if (valor > 0) return "pos";
+  if (valor < 0) return "neg";
+  return "muted";
+}
 
-  async function fetchData912() {
-    const r = await fetch(DATA912_URL);
-    return await r.json(); // array de objetos
-  }
+async function actualizar() {
+  try {
+    const [cedears, cclVenta] = await Promise.all([fetchCedears(), fetchCCLVenta()]);
+    const tbody = document.querySelector("#tablaCedears tbody");
+    tbody.innerHTML = "";
 
-  async function fetchYahooBatch(symbols) {
-    const url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + encodeURIComponent(symbols.join(","));
-    const r = await fetch(url);
-    const j = await r.json();
-    const out = {};
-    (j?.quoteResponse?.result || []).forEach(q => {
-      out[(q.symbol||"").toUpperCase()] = {
-        price: (q.regularMarketPrice ?? null),
-        prevClose: (q.regularMarketPreviousClose ?? null)
-      };
-    });
-    return out;
-  }
-
-  async function fetchYahooMany(usSymbolsRaw) {
-    const uniq = Array.from(new Set(usSymbolsRaw.map(s => toYahoo(s).toUpperCase()).filter(Boolean)));
-    const chunks = [];
-    for (let i=0;i<uniq.length;i+=YH_BATCH_SIZE) chunks.push(uniq.slice(i, i+YH_BATCH_SIZE));
-    const maps = await Promise.all(chunks.map(fetchYahooBatch));
-    // merge
-    const final = {};
-    for (const m of maps) Object.assign(final, m);
-    return final;
-  }
-
-  async function refresh() {
-    try {
-      // 1) CCL venta ref
-      const cclRef = await fetchCCLVenta();
-
-      // 2) Lista data912
-      const rows = await fetchData912();
-
-      // 3) Yahoo para USD (solo si tenemos ticker_usa)
-      const usList = rows.map(r => r.ticker_usa).filter(Boolean);
-      const yhQuotes = await fetchYahooMany(usList);
-
-      // 4) Render
-      $tbody.innerHTML = "";
-
-      for (const r of rows) {
-        const tUSAraw = r.ticker_usa || "";
-        const tAR = r.ticker_ar || "";
-        const tUSAyh = toYahoo(tUSAraw).toUpperCase();
-
-        // CCL implícito del papel (preferimos mark; si no, promedio de bid/ask)
-        const cclMark = (r.CCL_mark != null) ? Number(r.CCL_mark) :
-                        (r.CCL_bid != null && r.CCL_ask != null) ? (Number(r.CCL_bid)+Number(r.CCL_ask))/2 :
-                        (r.CCL_bid ?? r.CCL_ask ?? null);
-
-        // Spread vs CCL ref venta
-        const spread = (cclRef && cclMark) ? ((cclMark - cclRef) / cclRef) * 100 : null;
-
-        // ΔCCL implícito del papel (para estimar ΔARS)
-        const cclClose = (r.CCL_close != null) ? Number(r.CCL_close) : null;
-        const dCCL_pct = (cclMark && cclClose && cclClose !== 0) ? ((cclMark - cclClose)/cclClose)*100 : null;
-
-        // Yahoo USD
-        const q = yhQuotes[tUSAyh] || {};
-        const pxUSD = (q.price != null) ? Number(q.price) : null;
-        const prevUSD = (q.prevClose != null) ? Number(q.prevClose) : null;
-        const dUSD_pct = (pxUSD && prevUSD && prevUSD !== 0) ? ((pxUSD - prevUSD)/prevUSD)*100 : null;
-
-        // Cambio ARS estimado = ΔUSD + ΔCCL (del mismo papel)
-        const dARS_est = (dUSD_pct != null && dCCL_pct != null) ? (dUSD_pct + dCCL_pct) : null;
-
-        // Flechas
-        const aUSD = arrow(dUSD_pct ?? 0);
-        const aARS = arrow(dARS_est ?? 0);
-
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td class="left">${tAR || "–"}</td>
-          <td class="left">${tUSAraw || "–"}</td>
-          <td>${pxUSD != null ? fmtNum(pxUSD,2) : "–"}</td>
-          <td class="${clsPN(dUSD_pct ?? 0)}">${dUSD_pct != null ? `${aUSD} ${fmtNum(dUSD_pct,2)}%` : "–"}</td>
-          <td>${cclMark != null ? fmtNum(cclMark,2) : "–"}</td>
-          <td class="${clsPN(spread ?? 0)}">${spread != null ? `${fmtNum(spread,2)}%` : "–"}</td>
-          <td class="${clsPN(dARS_est ?? 0)}">${dARS_est != null ? `${aARS} ${fmtNum(dARS_est,2)}%` : "–"}</td>
-        `;
-        $tbody.appendChild(tr);
-      }
-
-    } catch (e) {
-      console.error("Error al actualizar:", e);
-      $tbody.innerHTML = `<tr><td colspan="7" class="muted">No se pudieron cargar los datos.</td></tr>`;
+    if (!cedears || cedears.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5">No se recibieron datos.</td></tr>`;
+      return;
     }
-  }
 
-  // Primera carga + refresco
-  refresh();
-  setInterval(refresh, 60000);
-})();
+    cedears.forEach(c => {
+      const tickerAR = c.ticker_ar || "-";
+      const tickerUSA = c.ticker_usa || "-";
+      const cclMark = Number(c.CCL_mark) || 0;
+      const cclClose = Number(c.CCL_close) || 0;
+      const spread = cclVenta ? ((cclMark - cclVenta) / cclVenta) * 100 : null;
+      const cambioCCL = (cclMark && cclClose) ? ((cclMark - cclClose) / cclClose) * 100 : null;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="left">${tickerAR}</td>
+        <td class="left">${tickerUSA}</td>
+        <td>${cclMark.toFixed(2)}</td>
+        <td class="${colorClase(spread)}">${spread ? spread.toFixed(2) + "%" : "-"}</td>
+        <td class="${colorClase(cambioCCL)}">${flecha(cambioCCL)} ${cambioCCL ? cambioCCL.toFixed(2) + "%" : "-"}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+  } catch (err) {
+    console.error("Error cargando datos:", err);
+  }
+}
+
+actualizar();
+setInterval(actualizar, 60000);
 </script>
 
 </body>
