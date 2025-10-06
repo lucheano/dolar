@@ -16,17 +16,18 @@
 <body>
 
 <h1>Monitor de CEDEARs y Arbitraje</h1>
-<p>Datos actualizados automáticamente desde <strong>dolarapi.com</strong> y <strong>pelotalibre.digital</strong></p>
+<p>Datos actualizados automáticamente desde <strong>dolarapi.com</strong> y <strong>data912.com</strong></p>
 
 <table>
   <thead>
     <tr>
-      <th>Símbolo</th>
-      <th>Precio CEDEAR $</th>
-      <th>Precio acción US$</th>
-      <th>Teórico ARS</th>
-      <th>Spread %</th>
-      <th>Variación %</th>
+      <th>Ticker</th>
+      <th>Precio ARS</th>
+      <th>Cambio ARS</th>
+      <th>Tipo de Cambio Implícito</th>
+      <th>Spread vs CCL</th>
+      <th>Volumen</th>
+      <th>Arbitrado</th>
     </tr>
   </thead>
   <tbody id="cedearTable"></tbody>
@@ -38,55 +39,40 @@ async function loadCedears() {
     // Obtener CCL (venta)
     const dolarRes = await fetch("https://dolarapi.com/v1/dolares");
     const dolarData = await dolarRes.json();
-    const ccl = dolarData.find(d => d.casa === "contadoconliqui").venta;
+    const cclVenta = dolarData.find(d => d.casa === "contadoconliqui").venta;
 
-    // Obtener CEDEARs
-    const res = await fetch("https://data912.com/live/arg_cedears");
+    // Obtener CEDEARs desde data912
+    const res = await fetch("https://api.allorigins.win/raw?url=https://data912.com/live/arg_cedears");
     const data = await res.json();
 
-    // Tabla
     const tbody = document.getElementById("cedearTable");
     tbody.innerHTML = "";
 
-    // Diccionario de precios en USD (temporal, luego se puede automatizar con Yahoo Finance)
-    const preciosAccionUSD = {
-      "AAPL": 225, "AAL": 27, "ABBV": 150, "MSFT": 420, "TSLA": 255
-    };
-
-    // Diccionario de ratios (temporal)
-    const ratios = {
-      "AAPL": 10, "AAL": 5, "ABBV": 20, "MSFT": 5, "TSLA": 15
-    };
-
-    data.forEach(cedear => {
-      const symbol = cedear.symbol;
-      const precioARS = cedear.c;
-      const variacion = cedear.pct_change;
-
-      const precioUSD = preciosAccionUSD[symbol] || 0;
-      const ratio = ratios[symbol] || 1;
-
-      let teoricoARS = 0;
-      let spread = 0;
-
-      if (precioUSD > 0) {
-        teoricoARS = precioUSD * ccl / ratio;
-        spread = ((precioARS - teoricoARS) / teoricoARS) * 100;
-      }
+    data.forEach(item => {
+      const ticker = item.ticker_ar;
+      const cclMark = Number(item.CCL_mark);
+      const cclClose = Number(item.CCL_close);
+      const cambioARS = cclClose ? ((cclMark - cclClose) / cclClose) * 100 : 0;
+      const spread = cclVenta ? ((cclMark - cclVenta) / cclVenta) * 100 : 0;
+      const volumen = item.ars_volume || 0;
+      const arbitrado = Math.abs(spread) < 1; // ±1% margen
 
       const row = document.createElement("tr");
       row.innerHTML = `
-        <td>${symbol}</td>
-        <td>${precioARS.toFixed(2)}</td>
-        <td>${precioUSD > 0 ? precioUSD.toFixed(2) : "-"}</td>
-        <td>${teoricoARS > 0 ? teoricoARS.toFixed(2) : "-"}</td>
+        <td>${ticker}</td>
+        <td>${cclMark.toFixed(2)}</td>
+        <td class="${cambioARS >= 0 ? "positivo" : "negativo"}">
+          ${cambioARS >= 0 ? "▲" : "▼"} ${cambioARS.toFixed(2)}%
+        </td>
+        <td>${cclMark.toFixed(2)}</td>
         <td class="${spread >= 0 ? "positivo" : "negativo"}">${spread.toFixed(2)}%</td>
-        <td class="${variacion >= 0 ? "positivo" : "negativo"}">${variacion.toFixed(2)}%</td>
+        <td>${volumen.toLocaleString()}</td>
+        <td>${arbitrado ? "Sí" : "No"}</td>
       `;
       tbody.appendChild(row);
     });
 
-    console.log("CCL Venta:", ccl);
+    console.log("CCL Venta:", cclVenta);
 
   } catch (error) {
     console.error("Error al cargar datos:", error);
