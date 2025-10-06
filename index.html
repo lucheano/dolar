@@ -47,7 +47,7 @@ async function cargar(){
     const cclVenta = dolarData.find(d=>d.casa==="contadoconliqui").venta;
 
     // obtener CEDEARs
-    const data = await obtenerJSON("https://data912.com/live/arg_cedears");
+    const data = await obtenerJSON("https://dolarhoy.dev.ar/dolarccs.json");
     const tbody = document.getElementById("tabla");
     tbody.innerHTML = "";
 
