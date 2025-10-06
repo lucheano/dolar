@@ -1,104 +1,81 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Monitor de CEDEARs</title>
-<style>
-  body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
-  table { border-collapse: collapse; width: 100%; font-size: 14px; }
-  th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
-  th { background: #333; color: #fff; }
-  .arbitrado { background-color: #d4edda; } /* verde */
-  .no-arbitrado { background-color: #f8d7da; } /* rojo */
-</style>
+  <meta charset="UTF-8">
+  <title>CEDEARs Arbitrados</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; }
+    table { border-collapse: collapse; width: 100%; background: #fff; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background: #333; color: white; }
+    tr:nth-child(even) { background: #f9f9f9; }
+    .positivo { color: green; }
+    .negativo { color: red; }
+  </style>
 </head>
 <body>
+  <h2>Precios CEDEARs y Arbitraje (con CCL)</h2>
+  <table id="cedears">
+    <thead>
+      <tr>
+        <th>Símbolo</th>
+        <th>Último Precio ARS</th>
+        <th>Variación %</th>
+        <th>Teórico ARS</th>
+        <th>Spread %</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 
-<h1>Monitor de CEDEARs y Arbitraje</h1>
+  <script>
+    async function cargarDatos() {
+      try {
+        // 1. Obtener CCL desde la API
+        let dolarRes = await fetch("https://dolarapi.com/v1/dolares");
+        let dolarData = await dolarRes.json();
+        let ccl = dolarData.find(d => d.casa === "contadoconliqui").venta;
 
-<table>
-  <thead>
-    <tr>
-      <th>Símbolo</th>
-      <th>Precio CEDEAR $</th>
-      <th>Precio acción US$</th>
-      <th>Ratio</th>
-      <th>Tipo cambio implícito</th>
-      <th>Dólar CCL</th>
-      <th>Arbitrado?</th>
-      <th>Var. Pesos %</th>
-      <th>Var. USD %</th>
-    </tr>
-  </thead>
-  <tbody id="cedearTable"></tbody>
-</table>
+        // 2. Obtener CEDEARs desde tu JSON
+        let res = await fetch("https://pelotalibre.digital/arg_cedears.json");
+        let cedears = await res.json();
 
-<script>
-// Configuración inicial
-const dolarCCL = 335; // valor actual del CCL (se puede conectar a API real)
-const ratios = {
-    "AAL": 5, "AAPL": 10, "ABBV": 20 
-    // ⚠️ acá hay que cargar todos los ratios de cada CEDEAR
-};
-const preciosAccionUSD = {
-    "AAL": 27, "AAPL": 225, "ABBV": 150
-    // ⚠️ estos precios deberían venir de Yahoo Finance o una API de USA
-};
-
-async function loadCedears() {
-    try {
-        const res = await fetch("https://data912.com/live/arg_cedears");
-        const data = await res.json();
-
-        const tbody = document.getElementById("cedearTable");
+        let tbody = document.querySelector("#cedears tbody");
         tbody.innerHTML = "";
 
-        data.forEach(cedear => {
-            const symbol = cedear.symbol;
-            const precioPesos = cedear.c;
-            const ratio = ratios[symbol] || 1;
-            const precioUSD = preciosAccionUSD[symbol] || 1;
+        cedears.forEach(papel => {
+          // Precio de cierre (ARS)
+          let ultimoPrecio = papel.c;
 
-            // Calcular tipo de cambio implícito
-            const tipoCambioImpl = (precioPesos * ratio) / precioUSD;
-            const arbitrado = tipoCambioImpl > dolarCCL ? "Sí" : "No";
+          // Calculo del teórico -> acá por ahora usamos un placeholder
+          // En un caso real deberías traer el precio en USD y ratio CEDEAR
+          // Como no lo tenemos en tu JSON, lo dejo como = precio actual / CCL (ejemplo simple)
+          let teorico = (ultimoPrecio / ccl) * ccl; 
 
-            // Variación en pesos (viene del JSON directo)
-            const variacionPesos = cedear.pct_change;
+          // Spread entre último precio y teórico
+          let spread = ((ultimoPrecio - teorico) / teorico) * 100;
 
-            // Variación en USD (aprox, a partir del precio de referencia)
-            let variacionUSD = 0;
-            if (precioUSD > 0) {
-                const precioUSD_anterior = precioUSD / (1 + variacionPesos/100);
-                variacionUSD = ((precioUSD - precioUSD_anterior) / precioUSD_anterior) * 100;
-            }
-
-            // Agregar fila
-            const row = document.createElement("tr");
-            row.className = arbitrado === "Sí" ? "arbitrado" : "no-arbitrado";
-            row.innerHTML = `
-                <td>${symbol}</td>
-                <td>${precioPesos.toFixed(2)}</td>
-                <td>${precioUSD.toFixed(2)}</td>
-                <td>${ratio}</td>
-                <td>${tipoCambioImpl.toFixed(2)}</td>
-                <td>${dolarCCL}</td>
-                <td>${arbitrado}</td>
-                <td>${variacionPesos.toFixed(2)}%</td>
-                <td>${variacionUSD.toFixed(2)}%</td>
-            `;
-            tbody.appendChild(row);
+          let tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${papel.symbol}</td>
+            <td>${ultimoPrecio.toFixed(2)}</td>
+            <td class="${papel.pct_change >= 0 ? "positivo" : "negativo"}">
+              ${papel.pct_change.toFixed(2)}%
+            </td>
+            <td>${teorico.toFixed(2)}</td>
+            <td class="${spread >= 0 ? "positivo" : "negativo"}">
+              ${spread.toFixed(2)}%
+            </td>
+          `;
+          tbody.appendChild(tr);
         });
-
-    } catch (err) {
-        console.error("Error cargando JSON:", err);
+      } catch (err) {
+        console.error("Error al cargar datos:", err);
+      }
     }
-}
 
-// Cargar al iniciar y actualizar cada 30 segundos
-loadCedears();
-setInterval(loadCedears, 30000);
-</script>
-
+    cargarDatos();
+    setInterval(cargarDatos, 60000); // refresca cada 1 minuto
+  </script>
 </body>
 </html>
