@@ -1,133 +1,107 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>CEDEARs — Monitor (Data912 CCL)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <title>Monitor CEDEARs — DolarHoy.Dev</title>
   <style>
     body { font-family: Arial, sans-serif; background:#f9f9f9; padding:20px; }
     table { border-collapse: collapse; width:100%; font-size:14px; background:#fff; }
     th, td { border:1px solid #ccc; padding:6px; text-align:center; }
     th { background:#333; color:#fff; }
     tr:nth-child(even){ background:#f4f4f4; }
-    .pos { color:green; font-weight:bold; }
-    .neg { color:red; font-weight:bold; }
-    .muted { color:#777; }
-    .left { text-align:left; }
+    .positivo{ color:green; font-weight:bold; }
+    .negativo{ color:red; font-weight:bold; }
+    .muted{ color:#777; }
   </style>
 </head>
 <body>
 
-<h1>CEDEARs — Monitor</h1>
-<p>Fuente: <strong>dolarhoy.dev.ar/dolarccs.json</strong> (espejo de Data912 /live/ccl) + <strong>dolarapi.com</strong> (CCL venta). Refresco cada 20s.</p>
+<h1>Monitor CEDEARs — Data912 (via dolarhoy.dev.ar)</h1>
+<p>Datos de <strong>dolarhoy.dev.ar/dolarccs.json</strong> y CCL venta de <strong>dolarapi.com</strong>. Refresca cada 30 s.</p>
 
-<table id="tabla">
+<table>
   <thead>
     <tr>
-      <th class="left">Ticker</th>
-      <th>Precio ARS ↓</th>
-      <th>Cambio ARS</th>
-      <th>Precio USD</th>
-      <th>Cambio USD</th>
-      <th>Tipo de Cambio</th>
-      <th>Volumen</th>
+      <th>Ticker</th>
+      <th>Tipo de Cambio (CCL_mark)</th>
+      <th>Cambio % (vs CCL_close)</th>
+      <th>Spread vs CCL venta</th>
+      <th>Volumen ARS</th>
       <th>Arbitrado</th>
     </tr>
   </thead>
-  <tbody></tbody>
+  <tbody id="cedearTable"></tbody>
 </table>
 
 <script>
-const URL_DATA = "https://dolarhoy.dev.ar/dolarccs.json"; // tu espejo de data912 /live/ccl
+const URL_JSON = "https://dolarhoy.dev.ar/dolarccs.json";
 const URL_DOLAR = "https://dolarapi.com/v1/dolares";
-const ARBIT_THRESH = 1.0; // ±1%
+const UMBRAL_ARBITRAJE = 1.0; // ±1%
 
-const $tbody = document.querySelector("#tabla tbody");
-
-const fmt = (x, d=2) => (x==null || Number.isNaN(Number(x))) ? "–" : Number(x).toFixed(d);
-const arrow = (v) => (v>0 ? "▲" : (v<0 ? "▼" : ""));
-const clsPN = (v) => v>0 ? "pos" : (v<0 ? "neg" : "muted");
-
-// Obtiene una propiedad sin importar mayúsculas/minúsculas y variaciones
-function pick(obj, keys) {
-  if (!obj) return null;
-  const lower = {};
-  for (const k of Object.keys(obj)) lower[k.toLowerCase()] = obj[k];
-  for (const k of keys) {
-    const v = lower[k.toLowerCase()];
-    if (v !== undefined && v !== null) return v;
-  }
-  return null;
-}
-
-async function getJSON(url) {
-  const r = await fetch(url);
-  const txt = await r.text(); // algunos servidores no ponen header JSON
-  try { return JSON.parse(txt); }
-  catch(e){ console.error("No es JSON válido:", txt.slice(0,200)); return null; }
-}
-
-async function getCCLVenta() {
-  const arr = await getJSON(URL_DOLAR);
-  if (!Array.isArray(arr)) return null;
-  const o = arr.find(x => x.casa === "contadoconliqui");
-  return o ? Number(o.venta) : null;
-}
-
-function extractRow(raw) {
-  // Intentamos múltiples alias por campo
-  const ticker = pick(raw, ["ticker_ar","ticker","symbol","ticker_usa","s","code"]);
-
-  const cclMark  = Number(pick(raw, ["CCL_mark","ccl_mark","mark","ccl"]));
-  const cclBid   = Number(pick(raw, ["CCL_bid","ccl_bid","bid"]));
-  const cclAsk   = Number(pick(raw, ["CCL_ask","ccl_ask","ask"]));
-  const cclClose = Number(pick(raw, ["CCL_close","ccl_close","close","prev_close","previousclose"]));
-  let tc = (isFinite(cclMark) && cclMark>0) ? cclMark : null;
-  if (tc==null) {
-    const avg = (isFinite(cclBid)?cclBid:NaN) + (isFinite(cclAsk)?cclAsk:NaN);
-    if (isFinite(cclBid) && isFinite(cclAsk)) tc = avg/2;
-    else if (isFinite(cclBid)) tc = cclBid;
-    else if (isFinite(cclAsk)) tc = cclAsk;
-  }
-
-  const vol = Number(pick(raw, ["ars_volume","volume","vol","arsvol"]));
-
-  // % cambio con base en CCL (si hay close)
-  const cambioCCL = (tc!=null && isFinite(cclClose) && cclClose!==0) ? ((tc - cclClose)/cclClose)*100 : null;
-
-  return { ticker, tc, cclClose, vol, cambioCCL };
-}
-
-async function render() {
+async function fetchJSON(url) {
+  const res = await fetch(url);
+  const txt = await res.text();
+  console.log("Respuesta cruda desde", url, ":", txt.slice(0, 200)); // <- Debug
   try {
-    const [arr, cclVenta] = await Promise.all([getJSON(URL_DATA), getCCLVenta()]);
-    $tbody.innerHTML = "";
+    return JSON.parse(txt);
+  } catch (e) {
+    console.error("No se pudo parsear JSON:", e);
+    return null;
+  }
+}
 
-    if (!Array.isArray(arr) || arr.length===0) {
-      $tbody.innerHTML = `<tr><td colspan="8" class="muted">No se recibieron datos.</td></tr>`;
+async function loadData() {
+  try {
+    const [json, dolarData] = await Promise.all([
+      fetchJSON(URL_JSON),
+      fetchJSON(URL_DOLAR)
+    ]);
+
+    const cclVenta = dolarData?.find(d => d.casa === "contadoconliqui")?.venta ?? null;
+    console.log("CCL venta:", cclVenta);
+
+    const tbody = document.getElementById("cedearTable");
+    tbody.innerHTML = "";
+
+    if (!Array.isArray(json)) {
+      tbody.innerHTML = `<tr><td colspan="6" class="muted">No se obtuvieron datos válidos del JSON.</td></tr>`;
       return;
     }
 
-    // Debug: mostrar un ejemplo en consola para validar estructura real
-    console.log("Ejemplo de fila recibida:", arr[0]);
+    json.forEach(item => {
+      const ticker = item.ticker_ar || item.ticker_usa || item.symbol || "-";
+      const mark = Number(item.CCL_mark) || 0;
+      const close = Number(item.CCL_close) || 0;
+      const vol = Number(item.ars_volume) || 0;
 
-    for (const raw of arr) {
-      const { ticker, tc, cclClose, vol, cambioCCL } = extractRow(raw);
+      const cambio = close ? ((mark - close) / close) * 100 : 0;
+      const spread = cclVenta ? ((mark - cclVenta) / cclVenta) * 100 : 0;
+      const arbitrado = Math.abs(spread) <= UMBRAL_ARBITRAJE;
 
-      // Spread vs CCL venta
-      const spread = (tc!=null && cclVenta!=null && cclVenta!==0) ? ((tc - cclVenta)/cclVenta)*100 : null;
-      const arbitrado = (spread!=null) ? Math.abs(spread) <= ARBIT_THRESH : false;
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${ticker}</td>
+        <td>${mark.toFixed(2)}</td>
+        <td class="${cambio >= 0 ? "positivo" : "negativo"}">
+          ${cambio >= 0 ? "▲" : "▼"} ${cambio.toFixed(2)}%
+        </td>
+        <td class="${spread >= 0 ? "positivo" : "negativo"}">${spread.toFixed(2)}%</td>
+        <td>${vol.toLocaleString()}</td>
+        <td>${arbitrado ? "Sí" : "No"}</td>
+      `;
+      tbody.appendChild(row);
+    });
 
-      // Estas 4 columnas requieren fuentes adicionales que /live/ccl no trae -> mostramos “–”
-      const precioARS = null, cambioARS = null, precioUSD = null, cambioUSD = null;
+  } catch (error) {
+    console.error("Error general:", error);
+    document.getElementById("cedearTable").innerHTML =
+      `<tr><td colspan="6" class="muted">Error al cargar datos.</td></tr>`;
+  }
+}
 
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td class="left">${ticker || "–"}</td>
-        <td>${fmt(precioARS)}</td>
-        <td class="${clsPN(cambioARS)}">${cambioARS==null?"–":(arrow(cambioARS)+" "+fmt(cambioARS,2)+"%")}</td>
-        <td>${fmt(precioUSD)}</td>
-        <td class="${clsPN(cambioUSD)}">${cambioUSD==null?"–":(arrow(cambioUSD)+" "+fmt(cambioUSD,2)+"%")}</td>
-        <td>${fmt(tc)}</td>
-        <td>${vol==null ? "–" : Number(vol).toLocaleString()}</td>
-        <td><span class="${arbitrado?'pos':'neg'}">
+loadData();
+setInterval(loadData, 30000);
+</script>
+
+</body>
+</html>
