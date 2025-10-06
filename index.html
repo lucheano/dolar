@@ -47,7 +47,7 @@ const preciosAccionUSD = {
 
 async function loadCedears() {
     try {
-        const res = await fetch("https://pelotalibre.digital/arg_cedears.json");
+        const res = await fetch("https://data912.com/live/arg_cedears");
         const data = await res.json();
 
         const tbody = document.getElementById("cedearTable");
