@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <title>Monitor de CEDEARs</title>
 <style>
-  body { font-family: Arial, sans-serif; padding: 20px; }
-  table { border-collapse: collapse; width: 100%; }
-  th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-  th { background: #f4f4f4; }
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+  th { background: #333; color: #fff; }
   .arbitrado { background-color: #d4edda; } /* verde */
   .no-arbitrado { background-color: #f8d7da; } /* rojo */
 </style>
@@ -19,7 +19,7 @@
 <table>
   <thead>
     <tr>
-      <th>CEDEAR</th>
+      <th>Símbolo</th>
       <th>Precio CEDEAR $</th>
       <th>Precio acción US$</th>
       <th>Ratio</th>
@@ -34,51 +34,69 @@
 </table>
 
 <script>
-// Datos externos simulados
-const dolarCCL = 335; // Dólar CCL actual
-const ratios = { "AAL": 1 }; // Ratio CEDEAR:Acción, ajustar según CEDEAR
-const preciosAccionUSD = { "AAL": 27 }; // Precio acción subyacente en USD
+// Configuración inicial
+const dolarCCL = 335; // valor actual del CCL (se puede conectar a API real)
+const ratios = {
+    "AAL": 5, "AAPL": 10, "ABBV": 20 
+    // ⚠️ acá hay que cargar todos los ratios de cada CEDEAR
+};
+const preciosAccionUSD = {
+    "AAL": 27, "AAPL": 225, "ABBV": 150
+    // ⚠️ estos precios deberían venir de Yahoo Finance o una API de USA
+};
 
 async function loadCedears() {
-    // Simulamos fetch de JSON
-    // Podría ser: const res = await fetch('cedears.json'); const data = await res.json();
-    const data = [
-        {"symbol":"AAL","c":9055,"pct_change":2.89}
-    ];
+    try {
+        const res = await fetch("https://pelotalibre.digital/arg_cedears.json");
+        const data = await res.json();
 
-    const tbody = document.getElementById('cedearTable');
-    tbody.innerHTML = '';
+        const tbody = document.getElementById("cedearTable");
+        tbody.innerHTML = "";
 
-    data.forEach(cedear => {
-        const ratio = ratios[cedear.symbol] || 1;
-        const precioUSD = preciosAccionUSD[cedear.symbol] || 1;
-        const tipoCambioImpl = (cedear.c * ratio) / precioUSD;
-        const arbitrado = tipoCambioImpl > dolarCCL ? 'Sí' : 'No';
-        
-        // Variación USD aproximada a partir de pct_change en pesos
-        const variacionPesos = cedear.pct_change;
-        const variacionUSD = ((precioUSD - precioUSD / (1 + variacionPesos/100)) / (precioUSD / (1 + variacionPesos/100))) * 100;
+        data.forEach(cedear => {
+            const symbol = cedear.symbol;
+            const precioPesos = cedear.c;
+            const ratio = ratios[symbol] || 1;
+            const precioUSD = preciosAccionUSD[symbol] || 1;
 
-        const row = document.createElement('tr');
-        row.className = arbitrado === 'Sí' ? 'arbitrado' : 'no-arbitrado';
-        row.innerHTML = `
-            <td>${cedear.symbol}</td>
-            <td>${cedear.c.toFixed(2)}</td>
-            <td>${precioUSD.toFixed(2)}</td>
-            <td>${ratio}</td>
-            <td>${tipoCambioImpl.toFixed(2)}</td>
-            <td>${dolarCCL}</td>
-            <td>${arbitrado}</td>
-            <td>${variacionPesos.toFixed(2)}</td>
-            <td>${variacionUSD.toFixed(2)}</td>
-        `;
-        tbody.appendChild(row);
-    });
+            // Calcular tipo de cambio implícito
+            const tipoCambioImpl = (precioPesos * ratio) / precioUSD;
+            const arbitrado = tipoCambioImpl > dolarCCL ? "Sí" : "No";
+
+            // Variación en pesos (viene del JSON directo)
+            const variacionPesos = cedear.pct_change;
+
+            // Variación en USD (aprox, a partir del precio de referencia)
+            let variacionUSD = 0;
+            if (precioUSD > 0) {
+                const precioUSD_anterior = precioUSD / (1 + variacionPesos/100);
+                variacionUSD = ((precioUSD - precioUSD_anterior) / precioUSD_anterior) * 100;
+            }
+
+            // Agregar fila
+            const row = document.createElement("tr");
+            row.className = arbitrado === "Sí" ? "arbitrado" : "no-arbitrado";
+            row.innerHTML = `
+                <td>${symbol}</td>
+                <td>${precioPesos.toFixed(2)}</td>
+                <td>${precioUSD.toFixed(2)}</td>
+                <td>${ratio}</td>
+                <td>${tipoCambioImpl.toFixed(2)}</td>
+                <td>${dolarCCL}</td>
+                <td>${arbitrado}</td>
+                <td>${variacionPesos.toFixed(2)}%</td>
+                <td>${variacionUSD.toFixed(2)}%</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+    } catch (err) {
+        console.error("Error cargando JSON:", err);
+    }
 }
 
-// Cargar al iniciar
+// Cargar al iniciar y actualizar cada 30 segundos
 loadCedears();
-// Actualizar cada 30 segundos
 setInterval(loadCedears, 30000);
 </script>
 
