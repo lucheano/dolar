@@ -37,7 +37,7 @@
         let ccl = dolarData.find(d => d.casa === "contadoconliqui").venta;
 
         // 2. Obtener CEDEARs desde tu JSON
-        let res = await fetch("https://pelotalibre.digital/arg_cedears.json");
+        let res = await fetch("https://data912.com/live/arg_cedears");
         let cedears = await res.json();
 
         let tbody = document.querySelector("#cedears tbody");
