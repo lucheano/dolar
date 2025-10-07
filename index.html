@@ -5,7 +5,7 @@
   <title>Monitor CEDEARs — Data912 (Combinado)</title>
   <style>
     body { font-family: Arial, sans-serif; background:#f9f9f9; padding:20px; }
-    table { border-collapse: collapse; width:100%; font-size:14px; background:#fff; }
+    table { border-collapse: collapse; width:100%; background:#fff; font-size:14px; }
     th, td { border:1px solid #ccc; padding:6px; text-align:center; }
     th { background:#333; color:#fff; }
     tr:nth-child(even){ background:#f4f4f4; }
@@ -69,7 +69,7 @@ async function loadData(){
       return;
     }
 
-    // Indexar MEP por ticker para combinar
+    // Indexar MEP por ticker
     const mapMEP = {};
     mepData.forEach(m => mapMEP[m.ticker] = m);
 
@@ -80,8 +80,8 @@ async function loadData(){
       const volumen = Number(c.v) || 0;
 
       const mep = mapMEP[ticker];
-      const precioUSD = mep ? Number(mep.usd_ask) : null;
-      const varUSD = mep && mep.usd_bid ? ((mep.usd_ask - mep.usd_bid) / mep.usd_bid * 100) : null;
+      const precioUSD = mep ? Number(mep.usd_bid) : null; // ✅ CORRECTO
+      const varUSD = mep && mep.usd_ask ? ((mep.usd_bid - mep.usd_ask) / mep.usd_ask * 100) : null;
       const tipoCambio = (precioARS && precioUSD) ? (precioARS / precioUSD) : null;
       const spread = (tipoCambio && cclVenta) ? ((tipoCambio - cclVenta) / cclVenta * 100) : null;
       const arbitrado = spread != null ? Math.abs(spread) <= UMBRAL : false;
