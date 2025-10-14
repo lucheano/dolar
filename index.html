@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Monitor CEDEARs — Data912 (Combinado)</title>
+  <title>Arbitraje CEDEARs</title>
   <style>
     body { font-family: Arial, sans-serif; background:#f9f9f9; padding:20px; }
     table { border-collapse: collapse; width:100%; background:#fff; font-size:14px; }
@@ -12,103 +12,93 @@
     .positivo{ color:green; font-weight:bold; }
     .negativo{ color:red; font-weight:bold; }
     .muted{ color:#777; }
-    .left { text-align:left; }
   </style>
 </head>
 <body>
 
-<h1>Monitor CEDEARs — Data912 (Combinado)</h1>
-<p>Fuentes: <strong>data912.com/live/arg_cedears</strong>, <strong>data912.com/live/mep</strong> y <strong>dolarapi.com</strong>. Actualiza cada 30 s.</p>
+<h1>Monitor de Arbitraje de CEDEARs</h1>
+<p>Fuentes: <strong>data912.com</strong>, <strong>dolarapi.com</strong>, <strong>ratios.json</strong>.</p>
 
 <table>
   <thead>
     <tr>
-      <th class="left">Ticker</th>
-      <th>Precio ARS</th>
-      <th>Variación Pesos %</th>
-      <th>Precio USD</th>
-      <th>Variación USD %</th>
-      <th>Tipo de Cambio</th>
-      <th>Volumen ARS</th>
-      <th>Arbitrado</th>
+      <th>Ticker</th>
+      <th>Cotización en USA (USD)</th>
+      <th>Precio CEDEAR (ARS)</th>
+      <th>Precio CEDEAR (USD)</th>
+      <th>Precio Esperado (ARS)</th>
+      <th>Diferencia % ARS</th>
+      <th>Diferencia % USD</th>
     </tr>
   </thead>
-  <tbody id="cedearTable"></tbody>
+  <tbody id="tabla"></tbody>
 </table>
 
 <script>
-const URL_ARG = "https://data912.com/live/arg_cedears";
-const URL_MEP = "https://data912.com/live/mep";
+const URL_CEDEARS = "https://data912.com/live/arg_cedears";
 const URL_DOLAR = "https://dolarapi.com/v1/dolares";
-const UMBRAL = 1.0; // ±1 %
+const URL_RATIOS = "https://tusitio.com/ratios.json"; // ⚠️ Cambiá esto a tu URL real
+const UMBRAL = 1.0;
 
 const fmt = (x, d=2) => (x==null || isNaN(x)) ? "–" : Number(x).toFixed(d);
 const arrow = v => v>0 ? "▲" : v<0 ? "▼" : "";
 const clsPN = v => v>0 ? "positivo" : v<0 ? "negativo" : "muted";
 
-async function fetchJSON(url){
+async function fetchJSON(url) {
   const res = await fetch(url);
   const txt = await res.text();
-  try { return JSON.parse(txt); }
-  catch(e){ console.error("Error JSON", url, e, txt.slice(0,100)); return null; }
+  try { return JSON.parse(txt); } 
+  catch(e) { console.error("Error JSON", url, e, txt.slice(0,200)); return null; }
 }
 
-async function loadData(){
+async function loadData() {
   try {
-    const [argData, mepData, dolarData] = await Promise.all([
-      fetchJSON(URL_ARG),
-      fetchJSON(URL_MEP),
-      fetchJSON(URL_DOLAR)
+    const [cedears, dolarData, ratiosData] = await Promise.all([
+      fetchJSON(URL_CEDEARS),
+      fetchJSON(URL_DOLAR),
+      fetchJSON(URL_RATIOS)
     ]);
-    const cclVenta = dolarData.find(d => d.casa === "contadoconliqui").venta;
-    const tbody = document.getElementById("cedearTable");
+
+    const ccl = dolarData.find(d => d.casa === "contadoconliqui").venta;
+    const ratios = ratiosData.ratios || ratiosData; // por compatibilidad
+    const mapRatios = Object.fromEntries(ratios.map(r => [r.ticker, r.ratio]));
+
+    const tbody = document.getElementById("tabla");
     tbody.innerHTML = "";
 
-    if (!Array.isArray(argData) || !Array.isArray(mepData)){
-      tbody.innerHTML = `<tr><td colspan="8" class="muted">Sin datos válidos</td></tr>`;
-      return;
-    }
+    cedears.forEach(c => {
+      const ratio = mapRatios[c.symbol];
+      if (!ratio) return;
 
-    // Indexar MEP por ticker
-    const mapMEP = {};
-    mepData.forEach(m => mapMEP[m.ticker] = m);
-
-    argData.forEach(c => {
-      const ticker = c.symbol;
       const precioARS = Number(c.c) || 0;
-      const varPesos = Number(c.pct_change) || 0;
-      const volumen = Number(c.v) || 0;
+      const precioUSD = precioARS / ccl; // Precio del CEDEAR expresado en USD
+      const cotizacionUSA = precioUSD / ratio; // valor teórico en Nasdaq/Nyse
+      const precioEsperadoARS = cotizacionUSA * ratio * ccl;
 
-      const mep = mapMEP[ticker];
-      const precioUSD = mep ? Number(mep.usd_bid) : null; // ✅ CORRECTO
-      const varUSD = mep && mep.usd_ask ? ((mep.usd_bid - mep.usd_ask) / mep.usd_ask * 100) : null;
-      const tipoCambio = (precioARS && precioUSD) ? (precioARS / precioUSD) : null;
-      const spread = (tipoCambio && cclVenta) ? ((tipoCambio - cclVenta) / cclVenta * 100) : null;
-      const arbitrado = spread != null ? Math.abs(spread) <= UMBRAL : false;
+      const diffARS = ((precioARS - precioEsperadoARS) / precioEsperadoARS) * 100;
+      const diffUSD = ((precioUSD - (precioEsperadoARS / ccl)) / (precioEsperadoARS / ccl)) * 100;
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td class="left">${ticker}</td>
+        <td>${c.symbol}</td>
+        <td>${fmt(cotizacionUSA)}</td>
         <td>${fmt(precioARS)}</td>
-        <td class="${clsPN(varPesos)}">${arrow(varPesos)} ${fmt(varPesos)}%</td>
         <td>${fmt(precioUSD)}</td>
-        <td class="${clsPN(varUSD)}">${arrow(varUSD)} ${fmt(varUSD)}%</td>
-        <td>${fmt(tipoCambio)}</td>
-        <td>${volumen.toLocaleString()}</td>
-        <td>${arbitrado ? "Sí" : "No"}</td>
+        <td>${fmt(precioEsperadoARS)}</td>
+        <td class="${clsPN(diffARS)}">${arrow(diffARS)} ${fmt(diffARS)}%</td>
+        <td class="${clsPN(diffUSD)}">${arrow(diffUSD)} ${fmt(diffUSD)}%</td>
       `;
       tbody.appendChild(tr);
     });
 
-  } catch (err) {
-    console.error("Error:", err);
-    document.getElementById("cedearTable").innerHTML =
-      `<tr><td colspan="8" class="muted">Error al cargar datos</td></tr>`;
+  } catch (e) {
+    console.error("Error:", e);
+    document.getElementById("tabla").innerHTML = `<tr><td colspan="7" class="muted">Error al cargar datos.</td></tr>`;
   }
 }
 
 loadData();
-setInterval(loadData, 30000);
+setInterval(loadData, 60000);
 </script>
 
 </body>
