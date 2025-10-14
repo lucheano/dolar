@@ -1,0 +1,1920 @@
+{
+    "ultima_actualizacion": "2025-10-14T22:19:12+00:00",
+    "ratios": [
+        {
+            "ticker": "AAL",
+            "descripcion": "American Airlines Group",
+            "ratio": 2
+        },
+        {
+            "ticker": "AAP",
+            "descripcion": "CEDEAR ADVANCE AUTO PARTS INC",
+            "ratio": 14
+        },
+        {
+            "ticker": "AAPL",
+            "descripcion": "Apple",
+            "ratio": 20
+        },
+        {
+            "ticker": "ABBV",
+            "descripcion": "AbbVie",
+            "ratio": 10
+        },
+        {
+            "ticker": "ABEV",
+            "descripcion": "Ambev",
+            "ratio": 3
+        },
+        {
+            "ticker": "ABEV3",
+            "descripcion": "CEDEAR AMBEV S.A",
+            "ratio": 1
+        },
+        {
+            "ticker": "ABNB",
+            "descripcion": "Airbnb",
+            "ratio": 15
+        },
+        {
+            "ticker": "ABT",
+            "descripcion": "CEDEAR ABBOT LAB",
+            "ratio": 4
+        },
+        {
+            "ticker": "ACN",
+            "descripcion": "CEDEAR ACCENTURE PLC",
+            "ratio": 75
+        },
+        {
+            "ticker": "ACWI",
+            "descripcion": "CEDEAR ISHARES MSCI ACWI ETF",
+            "ratio": 1
+        },
+        {
+            "ticker": "ADBE",
+            "descripcion": "Adobe Systems",
+            "ratio": 44
+        },
+        {
+            "ticker": "ADGO",
+            "descripcion": "Adecoagro",
+            "ratio": 1
+        },
+        {
+            "ticker": "ADI",
+            "descripcion": "Analog Devices",
+            "ratio": 15
+        },
+        {
+            "ticker": "ADP",
+            "descripcion": "Automatic Data Processing",
+            "ratio": 6
+        },
+        {
+            "ticker": "ADS",
+            "descripcion": "CEDEAR ADIDAS AG",
+            "ratio": 1
+        },
+        {
+            "ticker": "AEG",
+            "descripcion": "Aegon",
+            "ratio": 1
+        },
+        {
+            "ticker": "AEM",
+            "descripcion": "CEDEAR AGNICO EAGLE MINES LTD",
+            "ratio": 6
+        },
+        {
+            "ticker": "AHP",
+            "descripcion": "American Home Products",
+            "ratio": 1
+        },
+        {
+            "ticker": "AI",
+            "descripcion": "CEDEAR C3.AI INC (AI)",
+            "ratio": 5
+        },
+        {
+            "ticker": "AIG",
+            "descripcion": "American International Group",
+            "ratio": 5
+        },
+        {
+            "ticker": "AKO.B",
+            "descripcion": "Embotelladora Andina",
+            "ratio": 1
+        },
+        {
+            "ticker": "AMAT",
+            "descripcion": "CEDEAR APPLIED MATERIALS INC.ESC.",
+            "ratio": 5
+        },
+        {
+            "ticker": "AMD",
+            "descripcion": "Advanced Micro Devices",
+            "ratio": 10
+        },
+        {
+            "ticker": "AMGN",
+            "descripcion": "Amgen",
+            "ratio": 30
+        },
+        {
+            "ticker": "AMX",
+            "descripcion": "America Movil",
+            "ratio": 1
+        },
+        {
+            "ticker": "AMZN",
+            "descripcion": "Amazon",
+            "ratio": 144
+        },
+        {
+            "ticker": "ANF",
+            "descripcion": "Abercrombie & Fitch",
+            "ratio": 1
+        },
+        {
+            "ticker": "ARCO",
+            "descripcion": "CEDEAR ARCOS DORADOS HOLDINGS INC.",
+            "ratio": 1
+        },
+        {
+            "ticker": "ARKK",
+            "descripcion": "Ark Innovation",
+            "ratio": 10
+        },
+        {
+            "ticker": "ARM",
+            "descripcion": "CEDEAR ARM HOLDINGS PLC",
+            "ratio": 27
+        },
+        {
+            "ticker": "ASML",
+            "descripcion": "CEDEAR ASML HOLDING NV (ASML)",
+            "ratio": 146
+        },
+        {
+            "ticker": "ASR",
+            "descripcion": "Grupo Aeroportuario Del Sureste",
+            "ratio": 20
+        },
+        {
+            "ticker": "AVGO",
+            "descripcion": "Broadcom",
+            "ratio": 39
+        },
+        {
+            "ticker": "AVY",
+            "descripcion": "Avery Dennison",
+            "ratio": 18
+        },
+        {
+            "ticker": "AXP",
+            "descripcion": "American Express",
+            "ratio": 15
+        },
+        {
+            "ticker": "AZN",
+            "descripcion": "Astrazeneca",
+            "ratio": 2
+        },
+        {
+            "ticker": "B",
+            "descripcion": "CEDEAR BARRICK",
+            "ratio": 2
+        },
+        {
+            "ticker": "BA",
+            "descripcion": "The Boeing Company",
+            "ratio": 24
+        },
+        {
+            "ticker": "BA.C",
+            "descripcion": "Bank Of America",
+            "ratio": 4
+        },
+        {
+            "ticker": "BABA",
+            "descripcion": "Alibaba Group Holding",
+            "ratio": 9
+        },
+        {
+            "ticker": "BAK",
+            "descripcion": "CEDEAR BRASKEM SA",
+            "ratio": 1
+        },
+        {
+            "ticker": "BAS",
+            "descripcion": "CEDEAR BASF AG",
+            "ratio": 1
+        },
+        {
+            "ticker": "BAYN",
+            "descripcion": "Bayer AG",
+            "ratio": 1
+        },
+        {
+            "ticker": "BB",
+            "descripcion": "Blackberry",
+            "ratio": 3
+        },
+        {
+            "ticker": "BBD",
+            "descripcion": "Banco Bradesco",
+            "ratio": 1
+        },
+        {
+            "ticker": "BBDC3",
+            "descripcion": "CEDEAR BANCO BRADESCO S.A.",
+            "ratio": 1
+        },
+        {
+            "ticker": "BBV",
+            "descripcion": "Bilbao Vizcaya Argentaria",
+            "ratio": 1
+        },
+        {
+            "ticker": "BCS",
+            "descripcion": "Barclays Bank",
+            "ratio": 1
+        },
+        {
+            "ticker": "BHP",
+            "descripcion": "CEDEAR BHP BILLITON LIMITED",
+            "ratio": 2
+        },
+        {
+            "ticker": "BIDU",
+            "descripcion": "CEDEAR BAIDU, INC.",
+            "ratio": 1
+        },
+        {
+            "ticker": "BIIB",
+            "descripcion": "Biogen",
+            "ratio": 13
+        },
+        {
+            "ticker": "BIOX",
+            "descripcion": "Bioceres Crop Solutions",
+            "ratio": 1
+        },
+        {
+            "ticker": "BITF",
+            "descripcion": "Bitfarms",
+            "ratio": 1
+        },
+        {
+            "ticker": "BK",
+            "descripcion": "The Bank Of New York Mellon",
+            "ratio": 2
+        },
+        {
+            "ticker": "BKNG",
+            "descripcion": "CEDEAR BOOKING HOLDINGS INC.",
+            "ratio": 700
+        },
+        {
+            "ticker": "BKR",
+            "descripcion": "CEDEAR BAKER HUGHES CO.",
+            "ratio": 7
+        },
+        {
+            "ticker": "BMY",
+            "descripcion": "Bristol-Myers Squibb Company",
+            "ratio": 3
+        },
+        {
+            "ticker": "BNG",
+            "descripcion": "CEDEAR BUNGE LTD",
+            "ratio": 5
+        },
+        {
+            "ticker": "BP",
+            "descripcion": "BP PCL",
+            "ratio": 5
+        },
+        {
+            "ticker": "BPA11",
+            "descripcion": "CEDEAR BANCO BTG PACTUAL S.A. UNIT",
+            "ratio": 1
+        },
+        {
+            "ticker": "BRFS",
+            "descripcion": "BRF",
+            "ratio": 1
+        },
+        {
+            "ticker": "BRKB",
+            "descripcion": "Berkshire Hathaway",
+            "ratio": 22
+        },
+        {
+            "ticker": "BSBR",
+            "descripcion": "CEDEAR BANCO SANTANDER (BRASIL) S.A.",
+            "ratio": 1
+        },
+        {
+            "ticker": "BSN",
+            "descripcion": "CEDEAR GROUP DANONE SA ESC",
+            "ratio": 1
+        },
+        {
+            "ticker": "C",
+            "descripcion": "Citigroup",
+            "ratio": 3
+        },
+        {
+            "ticker": "CAAP",
+            "descripcion": "CEDEAR CORPORACION AMERICA AIRPORTS S.A",
+            "ratio": 0.25
+        },
+        {
+            "ticker": "CAH",
+            "descripcion": "Cardinal Health",
+            "ratio": 3
+        },
+        {
+            "ticker": "CAJ",
+            "descripcion": "Canon",
+            "ratio": 2
+        },
+        {
+            "ticker": "CAR",
+            "descripcion": "Avis Budget Group",
+            "ratio": 26
+        },
+        {
+            "ticker": "CAT",
+            "descripcion": "Caterpillar",
+            "ratio": 20
+        },
+        {
+            "ticker": "CCL",
+            "descripcion": "CEDEAR CARNIVAL CORP.",
+            "ratio": 3
+        },
+        {
+            "ticker": "CDE",
+            "descripcion": "Coeur Mining",
+            "ratio": 1
+        },
+        {
+            "ticker": "CEG",
+            "descripcion": "CEDEAR CONSTELLATION ENERGY CORPORATION (CEG)",
+            "ratio": 45
+        },
+        {
+            "ticker": "CIBR",
+            "descripcion": "CEDEAR FIRST TRUST NASDAQ CYBERSECURITY",
+            "ratio": 10
+        },
+        {
+            "ticker": "CL",
+            "descripcion": "Colgate Palmolive",
+            "ratio": 3
+        },
+        {
+            "ticker": "CLS",
+            "descripcion": "CEDEAR CELESTICA INC (CLS)",
+            "ratio": 20
+        },
+        {
+            "ticker": "COIN",
+            "descripcion": "Coinbase Global",
+            "ratio": 27
+        },
+        {
+            "ticker": "COST",
+            "descripcion": "Costco Wholesale",
+            "ratio": 48
+        },
+        {
+            "ticker": "CRM",
+            "descripcion": "Salesforce",
+            "ratio": 18
+        },
+        {
+            "ticker": "CSCO",
+            "descripcion": "Cisco Systems",
+            "ratio": 5
+        },
+        {
+            "ticker": "CSNA3",
+            "descripcion": "CEDEAR COMPANHIA SIDERURGICA NACIONAL SA",
+            "ratio": 1
+        },
+        {
+            "ticker": "CVS",
+            "descripcion": "CEDEAR CVS HEALTH CORP.",
+            "ratio": 15
+        },
+        {
+            "ticker": "CVX",
+            "descripcion": "Chevron",
+            "ratio": 16
+        },
+        {
+            "ticker": "CX",
+            "descripcion": "Cemex",
+            "ratio": 1
+        },
+        {
+            "ticker": "DAL",
+            "descripcion": "CEDEAR DELTA AIR LINES INC.",
+            "ratio": 8
+        },
+        {
+            "ticker": "DD",
+            "descripcion": "Dupont de Nemours",
+            "ratio": 5
+        },
+        {
+            "ticker": "DE",
+            "descripcion": "Deere & Co.",
+            "ratio": 40
+        },
+        {
+            "ticker": "DECK",
+            "descripcion": "CEDEAR DECKERS OUTDOOR CORPORATION (DECK)",
+            "ratio": 25
+        },
+        {
+            "ticker": "DEO",
+            "descripcion": "CEDEAR DIAGEO PLC ADR",
+            "ratio": 6
+        },
+        {
+            "ticker": "DESP",
+            "descripcion": "Despegar.Com",
+            "ratio": 1
+        },
+        {
+            "ticker": "DHR",
+            "descripcion": "CEDEAR DANAHER CORP",
+            "ratio": 54
+        },
+        {
+            "ticker": "DIA",
+            "descripcion": "Spdr Dow Jones Industrial",
+            "ratio": 20
+        },
+        {
+            "ticker": "DISN",
+            "descripcion": "The Walt Disney Co.",
+            "ratio": 12
+        },
+        {
+            "ticker": "DOCU",
+            "descripcion": "DocuSign",
+            "ratio": 22
+        },
+        {
+            "ticker": "DOW",
+            "descripcion": "DOW",
+            "ratio": 1
+        },
+        {
+            "ticker": "DTEA",
+            "descripcion": "CEDEAR DEUTSCHE",
+            "ratio": 1
+        },
+        {
+            "ticker": "E",
+            "descripcion": "CEDEAR ENI SPA",
+            "ratio": 1
+        },
+        {
+            "ticker": "EA",
+            "descripcion": "Electronic Arts",
+            "ratio": 1
+        },
+        {
+            "ticker": "EBAY",
+            "descripcion": "Ebay",
+            "ratio": 2
+        },
+        {
+            "ticker": "EBR",
+            "descripcion": "Centrais Eléctricas Brasileiras",
+            "ratio": 1
+        },
+        {
+            "ticker": "EEM",
+            "descripcion": "Ishares Msci Emerging Market",
+            "ratio": 5
+        },
+        {
+            "ticker": "EFA",
+            "descripcion": "CEDEAR ISHARES MSCI EAFE ETF (EFA)",
+            "ratio": 1
+        },
+        {
+            "ticker": "EFX",
+            "descripcion": "Equifax",
+            "ratio": 16
+        },
+        {
+            "ticker": "ELP",
+            "descripcion": "Companhia Paranaense de Energía",
+            "ratio": 1
+        },
+        {
+            "ticker": "EOAN",
+            "descripcion": "CEDEAR E.ON SE A",
+            "ratio": 1
+        },
+        {
+            "ticker": "EQNR",
+            "descripcion": "CEDEAR EQUINOR ASA",
+            "ratio": 6
+        },
+        {
+            "ticker": "ERIC",
+            "descripcion": "Lm Ericsson Telephone",
+            "ratio": 2
+        },
+        {
+            "ticker": "ERJ",
+            "descripcion": "CEDEAR EMBRAER",
+            "ratio": 1
+        },
+        {
+            "ticker": "ETHA",
+            "descripcion": "CEDEAR ISHARES ETHEREUM TR ETF",
+            "ratio": 5
+        },
+        {
+            "ticker": "ETSY",
+            "descripcion": "Etsy",
+            "ratio": 16
+        },
+        {
+            "ticker": "EWJ",
+            "descripcion": "CEDEAR ETF ISHARES MSCI JAPAN (EWJ)",
+            "ratio": 14
+        },
+        {
+            "ticker": "EWZ",
+            "descripcion": "Ishares Msci Brazil Cap",
+            "ratio": 2
+        },
+        {
+            "ticker": "F",
+            "descripcion": "Ford Motor Company",
+            "ratio": 1
+        },
+        {
+            "ticker": "FCX",
+            "descripcion": "Freeport Mcmoran Copper & Gold",
+            "ratio": 3
+        },
+        {
+            "ticker": "FDX",
+            "descripcion": "Fedex Corp",
+            "ratio": 10
+        },
+        {
+            "ticker": "FMCC",
+            "descripcion": "CEDEAR FREDDIE M",
+            "ratio": 1
+        },
+        {
+            "ticker": "FMX",
+            "descripcion": "CEDEAR FOMENTO E",
+            "ratio": 6
+        },
+        {
+            "ticker": "FNMA",
+            "descripcion": "CEDEAR FED NAT M",
+            "ratio": 1
+        },
+        {
+            "ticker": "FSLR",
+            "descripcion": "CEDEAR FIRST SOL",
+            "ratio": 18
+        },
+        {
+            "ticker": "FXI",
+            "descripcion": "CEDEAR ISHARES TRUST FTSE CHINA 25 IF (FXI)",
+            "ratio": 5
+        },
+        {
+            "ticker": "GDX",
+            "descripcion": "CEDEAR VAN ECK GOLD MINERS ETF (GDX)",
+            "ratio": 1
+        },
+        {
+            "ticker": "GE",
+            "descripcion": "CEDEAR GE AEROSPACE",
+            "ratio": 8
+        },
+        {
+            "ticker": "GFI",
+            "descripcion": "Gold Fields",
+            "ratio": 1
+        },
+        {
+            "ticker": "GGB",
+            "descripcion": "CEDEAR GERDAU S.A.",
+            "ratio": 1
+        },
+        {
+            "ticker": "GILD",
+            "descripcion": "Gilead Sciences",
+            "ratio": 4
+        },
+        {
+            "ticker": "GLD",
+            "descripcion": "CEDEAR ETF SPDR GOLD TRUST",
+            "ratio": 50
+        },
+        {
+            "ticker": "GLOB",
+            "descripcion": "Globant",
+            "ratio": 18
+        },
+        {
+            "ticker": "GLW",
+            "descripcion": "Corning",
+            "ratio": 4
+        },
+        {
+            "ticker": "GM",
+            "descripcion": "General Motors",
+            "ratio": 1
+        },
+        {
+            "ticker": "GOOGL",
+            "descripcion": "Alphabet",
+            "ratio": 58
+        },
+        {
+            "ticker": "GPRK",
+            "descripcion": "Geopark",
+            "ratio": 1
+        },
+        {
+            "ticker": "GRMN",
+            "descripcion": "Garmin",
+            "ratio": 1
+        },
+        {
+            "ticker": "GS",
+            "descripcion": "The Goldman Sachs Group",
+            "ratio": 13
+        },
+        {
+            "ticker": "GSK",
+            "descripcion": "GSK",
+            "ratio": 4
+        },
+        {
+            "ticker": "GT",
+            "descripcion": "CEDEAR GOODYEAR TIRE & RUBBER CO.",
+            "ratio": 2
+        },
+        {
+            "ticker": "HAL",
+            "descripcion": "Halliburton",
+            "ratio": 2
+        },
+        {
+            "ticker": "HAPV3",
+            "descripcion": "CEDEAR HAPVIDA PARTICIPACOES INVEST SA",
+            "ratio": 1
+        },
+        {
+            "ticker": "HD",
+            "descripcion": "The Home Depot",
+            "ratio": 32
+        },
+        {
+            "ticker": "HDB",
+            "descripcion": "Hdfc Bank",
+            "ratio": 1
+        },
+        {
+            "ticker": "HHPD",
+            "descripcion": "CEDEAR HON HAI",
+            "ratio": 1
+        },
+        {
+            "ticker": "HL",
+            "descripcion": "Hecla Mining",
+            "ratio": 1
+        },
+        {
+            "ticker": "HMC",
+            "descripcion": "Honda Motor",
+            "ratio": 1
+        },
+        {
+            "ticker": "HMY",
+            "descripcion": "Harmony Gold Mining Company",
+            "ratio": 1
+        },
+        {
+            "ticker": "HNPIY",
+            "descripcion": "CEDEAR HUANENG",
+            "ratio": 1
+        },
+        {
+            "ticker": "HOG",
+            "descripcion": "Harley-Davidson",
+            "ratio": 3
+        },
+        {
+            "ticker": "HON",
+            "descripcion": "Honeywell International",
+            "ratio": 8
+        },
+        {
+            "ticker": "HPQ",
+            "descripcion": "Hp",
+            "ratio": 1
+        },
+        {
+            "ticker": "HSBC",
+            "descripcion": "Hsbc Holdings",
+            "ratio": 2
+        },
+        {
+            "ticker": "HSY",
+            "descripcion": "CEDEAR HERSHEY",
+            "ratio": 21
+        },
+        {
+            "ticker": "HUT",
+            "descripcion": "Hut 8 Mining",
+            "ratio": 1
+        },
+        {
+            "ticker": "HWM",
+            "descripcion": "CEDEAR HOWMET AEROSPACE INC.",
+            "ratio": 1
+        },
+        {
+            "ticker": "IBB",
+            "descripcion": "CEDEAR ISHARES NASDAQ BIOTECHNOLOGY ETF",
+            "ratio": 27
+        },
+        {
+            "ticker": "IBIT",
+            "descripcion": "CEDEAR ISHARES BITCOIN TR (IBIT)",
+            "ratio": 10
+        },
+        {
+            "ticker": "IBM",
+            "descripcion": "International Business Machines",
+            "ratio": 15
+        },
+        {
+            "ticker": "IBN",
+            "descripcion": "Icici Bank",
+            "ratio": 1
+        },
+        {
+            "ticker": "IEMG",
+            "descripcion": "CEDEAR ISHARES CORE MSCI EMERG.MARK.ETF",
+            "ratio": 1
+        },
+        {
+            "ticker": "IEUR",
+            "descripcion": "CEDEAR ISHARES CORE MSCI EUROPE ETF",
+            "ratio": 11
+        },
+        {
+            "ticker": "IFF",
+            "descripcion": "CEDEAR INTERNAT",
+            "ratio": 12
+        },
+        {
+            "ticker": "IJH",
+            "descripcion": "CEDEAR ETF ISHARES CORE S&P MID - CAP (IJH)",
+            "ratio": 12
+        },
+        {
+            "ticker": "INFY",
+            "descripcion": "Infosys",
+            "ratio": 1
+        },
+        {
+            "ticker": "ING",
+            "descripcion": "Ing Groep",
+            "ratio": 3
+        },
+        {
+            "ticker": "INTC",
+            "descripcion": "Intel Corporation",
+            "ratio": 5
+        },
+        {
+            "ticker": "IP",
+            "descripcion": "CEDEAR INT PAPER",
+            "ratio": 4
+        },
+        {
+            "ticker": "ISRG",
+            "descripcion": "CEDEAR NTUITIVE SURGICAL INC.",
+            "ratio": 90
+        },
+        {
+            "ticker": "ITA",
+            "descripcion": "CEDEAR ISHARES U.S. AEROPACE & DEFENSE ETF",
+            "ratio": 50
+        },
+        {
+            "ticker": "ITUB",
+            "descripcion": "Itaú Unibanco Holding",
+            "ratio": 1
+        },
+        {
+            "ticker": "ITUB3",
+            "descripcion": "CEDEAR BANCO ITAU UNIBANCO SA",
+            "ratio": 1
+        },
+        {
+            "ticker": "IVE",
+            "descripcion": "CEDEAR ISHARES S&P 500 VALUE ETF",
+            "ratio": 40
+        },
+        {
+            "ticker": "IVW",
+            "descripcion": "CEDEAR ISHARES S&P 500 GROWTH ETF",
+            "ratio": 20
+        },
+        {
+            "ticker": "IWDA",
+            "descripcion": "CEDEAR ISHARES CODE MSCI WORLD UCITS ETF",
+            "ratio": 24
+        },
+        {
+            "ticker": "IWM",
+            "descripcion": "Ishares Trust Russell 2000",
+            "ratio": 10
+        },
+        {
+            "ticker": "JBSS3",
+            "descripcion": "CEDEAR JBS S.A.",
+            "ratio": 1
+        },
+        {
+            "ticker": "JCI",
+            "descripcion": "CEDEAR TYCO INTERNATIONAL LTD",
+            "ratio": 1
+        },
+        {
+            "ticker": "JD",
+            "descripcion": "CEDEAR JD.COM, INC.",
+            "ratio": 4
+        },
+        {
+            "ticker": "JMIA",
+            "descripcion": "Jumia Technologies Ag",
+            "ratio": 1
+        },
+        {
+            "ticker": "JNJ",
+            "descripcion": "Johnson & Johnson",
+            "ratio": 15
+        },
+        {
+            "ticker": "JOYY",
+            "descripcion": "CEDEAR YY INC.",
+            "ratio": 1
+        },
+        {
+            "ticker": "JPM",
+            "descripcion": "J.P. Morgan & Chase Co.",
+            "ratio": 15
+        },
+        {
+            "ticker": "KB",
+            "descripcion": "Kb Financial Group",
+            "ratio": 1
+        },
+        {
+            "ticker": "KEP",
+            "descripcion": "Korea Electric Power",
+            "ratio": 1
+        },
+        {
+            "ticker": "KGC",
+            "descripcion": "Kinross Gold Corp",
+            "ratio": 1
+        },
+        {
+            "ticker": "KMB",
+            "descripcion": "Kimberly-Clark",
+            "ratio": 6
+        },
+        {
+            "ticker": "KO",
+            "descripcion": "The Coca Cola Company",
+            "ratio": 5
+        },
+        {
+            "ticker": "KOFM",
+            "descripcion": "Coca-Cola Femsa",
+            "ratio": 1
+        },
+        {
+            "ticker": "LAC",
+            "descripcion": "CEDEAR LITHIUM AMERICAS CORP",
+            "ratio": 1
+        },
+        {
+            "ticker": "LAR",
+            "descripcion": "CEDEAR LITHIUM AMERICAS (ARGENTINA) CORP",
+            "ratio": 1
+        },
+        {
+            "ticker": "LFC",
+            "descripcion": "China Life Insurance",
+            "ratio": 2
+        },
+        {
+            "ticker": "LLY",
+            "descripcion": "Eli Lilly and Company",
+            "ratio": 56
+        },
+        {
+            "ticker": "LMT",
+            "descripcion": "Lockheed Martin",
+            "ratio": 20
+        },
+        {
+            "ticker": "LRCX",
+            "descripcion": "CEDEAR LAM RESEARCH CORP.",
+            "ratio": 56
+        },
+        {
+            "ticker": "LVS",
+            "descripcion": "Las Vegas Sands",
+            "ratio": 2
+        },
+        {
+            "ticker": "LYG",
+            "descripcion": "Lloyds Banking Group",
+            "ratio": 2
+        },
+        {
+            "ticker": "MA",
+            "descripcion": "Mastercard",
+            "ratio": 33
+        },
+        {
+            "ticker": "MBG",
+            "descripcion": "CEDEAR MERCEDES - BENZ GROUP AG",
+            "ratio": 1
+        },
+        {
+            "ticker": "MBT",
+            "descripcion": "Mobile Telesystems",
+            "ratio": 1
+        },
+        {
+            "ticker": "MCD",
+            "descripcion": "Mcdonalds",
+            "ratio": 24
+        },
+        {
+            "ticker": "MDLZ",
+            "descripcion": "CEDEAR MONDELEZ INTERNATIONAL, INC.",
+            "ratio": 15
+        },
+        {
+            "ticker": "MDT",
+            "descripcion": "Medtronic Public Limited Company",
+            "ratio": 2
+        },
+        {
+            "ticker": "MELI",
+            "descripcion": "Mercadolibre",
+            "ratio": 120
+        },
+        {
+            "ticker": "META",
+            "descripcion": "Meta Platforms",
+            "ratio": 24
+        },
+        {
+            "ticker": "MFG",
+            "descripcion": "Mizuho Financial Group",
+            "ratio": 1
+        },
+        {
+            "ticker": "MGLU3",
+            "descripcion": "CEDEAR MAGAZINE LUIZA S.A.",
+            "ratio": 1
+        },
+        {
+            "ticker": "MMC",
+            "descripcion": "CEDEAR MARSH",
+            "ratio": 16
+        },
+        {
+            "ticker": "MMM",
+            "descripcion": "CEDEAR 3 M COMPANY ESC",
+            "ratio": 10
+        },
+        {
+            "ticker": "MO",
+            "descripcion": "Altria Group",
+            "ratio": 4
+        },
+        {
+            "ticker": "MOS",
+            "descripcion": "The Mosaic",
+            "ratio": 1
+        },
+        {
+            "ticker": "MRK",
+            "descripcion": "Merck &",
+            "ratio": 5
+        },
+        {
+            "ticker": "MRNA",
+            "descripcion": "CEDEAR MODERNA INC.",
+            "ratio": 19
+        },
+        {
+            "ticker": "MRVL",
+            "descripcion": "CEDEAR MARVELL TECHNOLOGY INC",
+            "ratio": 14
+        },
+        {
+            "ticker": "MSFT",
+            "descripcion": "Microsoft",
+            "ratio": 30
+        },
+        {
+            "ticker": "MSI",
+            "descripcion": "Motorola Solutions",
+            "ratio": 20
+        },
+        {
+            "ticker": "MSTR",
+            "descripcion": "Microstrategy",
+            "ratio": 20
+        },
+        {
+            "ticker": "MU",
+            "descripcion": "Micron Technology",
+            "ratio": 1
+        },
+        {
+            "ticker": "MUFG",
+            "descripcion": "Mitsubishi Ufj Financial Group",
+            "ratio": 1
+        },
+        {
+            "ticker": "MUX",
+            "descripcion": "CEDEAR MCEWEN MINING INC",
+            "ratio": 2
+        },
+        {
+            "ticker": "NATU3",
+            "descripcion": "CEDEAR NATURA COSMETICOS SA",
+            "ratio": 1
+        },
+        {
+            "ticker": "NEC1",
+            "descripcion": "CEDEAR NEC CORP",
+            "ratio": 1
+        },
+        {
+            "ticker": "NEM",
+            "descripcion": "Newmont Corporation",
+            "ratio": 3
+        },
+        {
+            "ticker": "NFLX",
+            "descripcion": "Netflix",
+            "ratio": 48
+        },
+        {
+            "ticker": "NG",
+            "descripcion": "CEDEAR NOVAGOLD RESOURCES INC.",
+            "ratio": 1
+        },
+        {
+            "ticker": "NGG",
+            "descripcion": "National Grid",
+            "ratio": 1
+        },
+        {
+            "ticker": "NIO",
+            "descripcion": "NIO",
+            "ratio": 4
+        },
+        {
+            "ticker": "NKE",
+            "descripcion": "CEDEAR NIKE INC. ESC.",
+            "ratio": 12
+        },
+        {
+            "ticker": "NLM",
+            "descripcion": "CEDEAR NOVOLIPETSK STEEL PJSC",
+            "ratio": 1
+        },
+        {
+            "ticker": "NMR",
+            "descripcion": "Nomura Holdings",
+            "ratio": 1
+        },
+        {
+            "ticker": "NOKA",
+            "descripcion": "Nokia Corporation",
+            "ratio": 1
+        },
+        {
+            "ticker": "NOW",
+            "descripcion": "CEDEAR SERVICENOW INC (NOW)",
+            "ratio": 172
+        },
+        {
+            "ticker": "NSAN",
+            "descripcion": "CEDEAR NISSAN",
+            "ratio": 1
+        },
+        {
+            "ticker": "NTCO",
+            "descripcion": "Natura & Co Holding",
+            "ratio": 1
+        },
+        {
+            "ticker": "NTES",
+            "descripcion": "Netease",
+            "ratio": 1
+        },
+        {
+            "ticker": "NU",
+            "descripcion": "CEDEAR NU HOLDINGS LTD\/CAYMAN ISLANDS",
+            "ratio": 2
+        },
+        {
+            "ticker": "NUE",
+            "descripcion": "Nucor Corp",
+            "ratio": 16
+        },
+        {
+            "ticker": "NVDA",
+            "descripcion": "Nvidia Corporation",
+            "ratio": 24
+        },
+        {
+            "ticker": "NVS",
+            "descripcion": "CEDEAR NOVARTIS",
+            "ratio": 4
+        },
+        {
+            "ticker": "NXE",
+            "descripcion": "CEDEAR NEXGEN ENERGY",
+            "ratio": 1
+        },
+        {
+            "ticker": "ORAN",
+            "descripcion": "Orange",
+            "ratio": 1
+        },
+        {
+            "ticker": "ORCL",
+            "descripcion": "CEDEAR ORACLE",
+            "ratio": 3
+        },
+        {
+            "ticker": "ORLY",
+            "descripcion": "CEDEAR O'REILLY AUTOMOTIVE INC",
+            "ratio": 222
+        },
+        {
+            "ticker": "OXY",
+            "descripcion": "Occidental Petroleum",
+            "ratio": 5
+        },
+        {
+            "ticker": "PAAS",
+            "descripcion": "CEDEAR PAN AMERICAN SILVER CORP",
+            "ratio": 3
+        },
+        {
+            "ticker": "PAC",
+            "descripcion": "CEDEAR AEROPORT.",
+            "ratio": 1
+        },
+        {
+            "ticker": "PAGS",
+            "descripcion": "CEDEAR PAGSEGURO DIGITAL LTD",
+            "ratio": 3
+        },
+        {
+            "ticker": "PANW",
+            "descripcion": "Palo Alto Networks",
+            "ratio": 50
+        },
+        {
+            "ticker": "PATH",
+            "descripcion": "CEDEAR UIPATH INC (PATH)",
+            "ratio": 2
+        },
+        {
+            "ticker": "PBI",
+            "descripcion": "Pitney Bowes",
+            "ratio": 1
+        },
+        {
+            "ticker": "PBR",
+            "descripcion": "CEDEAR PETROLEO BRASILEIRO S.A.",
+            "ratio": 1
+        },
+        {
+            "ticker": "PCAR",
+            "descripcion": "CEDEAR PACCAR",
+            "ratio": 3
+        },
+        {
+            "ticker": "PCRF",
+            "descripcion": "Panasonic Corporation",
+            "ratio": 1
+        },
+        {
+            "ticker": "PDD",
+            "descripcion": "CEDEAR PDD HOLDINGS INC (PDD)",
+            "ratio": 25
+        },
+        {
+            "ticker": "PEP",
+            "descripcion": "Pepsico",
+            "ratio": 18
+        },
+        {
+            "ticker": "PETR3",
+            "descripcion": "CEDEAR PETROLEO BRASILEIRO S.A.",
+            "ratio": 1
+        },
+        {
+            "ticker": "PFE",
+            "descripcion": "CEDEAR PFIZER",
+            "ratio": 4
+        },
+        {
+            "ticker": "PG",
+            "descripcion": "Procter & Gamble",
+            "ratio": 15
+        },
+        {
+            "ticker": "PHG",
+            "descripcion": "Koninklijke Philips",
+            "ratio": 5
+        },
+        {
+            "ticker": "PINS",
+            "descripcion": "CEDEAR PINTEREST INC.",
+            "ratio": 7
+        },
+        {
+            "ticker": "PKS",
+            "descripcion": "Posco Holdings",
+            "ratio": 1
+        },
+        {
+            "ticker": "PLTR",
+            "descripcion": "CEDEAR PALANTIR TECHNOLOGIES INC",
+            "ratio": 3
+        },
+        {
+            "ticker": "PM",
+            "descripcion": "CEDEAR PHILIP MORRIS INTERNATIONAL INC.",
+            "ratio": 18
+        },
+        {
+            "ticker": "PSO",
+            "descripcion": "Pearson",
+            "ratio": 1
+        },
+        {
+            "ticker": "PSQ",
+            "descripcion": "CEDEAR ETF PROSHARES SHORT QQQ (PSQ)",
+            "ratio": 8
+        },
+        {
+            "ticker": "PSX",
+            "descripcion": "CEDEAR PHILLIPS 66",
+            "ratio": 6
+        },
+        {
+            "ticker": "PYPL",
+            "descripcion": "Paypal Holdings",
+            "ratio": 8
+        },
+        {
+            "ticker": "QCOM",
+            "descripcion": "Qualcomm",
+            "ratio": 11
+        },
+        {
+            "ticker": "QQQ",
+            "descripcion": "Invesco Qqq Trust",
+            "ratio": 20
+        },
+        {
+            "ticker": "RACE",
+            "descripcion": "CEDEAR FERRARI NV",
+            "ratio": 83
+        },
+        {
+            "ticker": "RBLX",
+            "descripcion": "Roblox",
+            "ratio": 1
+        },
+        {
+            "ticker": "RCTB4",
+            "descripcion": "CEDEAR TELEBRAS PN RCTB41 PREF ESCRIT",
+            "ratio": 1
+        },
+        {
+            "ticker": "RGTI",
+            "descripcion": "CEDEAR RIGETTI COMPUTING (RGTI)",
+            "ratio": 2
+        },
+        {
+            "ticker": "RIO",
+            "descripcion": "CEDEAR RIO TINTO PLC - ADR",
+            "ratio": 8
+        },
+        {
+            "ticker": "RIOT",
+            "descripcion": "CEDEAR RIOT PLATFORMS INC.",
+            "ratio": 3
+        },
+        {
+            "ticker": "ROKU",
+            "descripcion": "CEDEAR ROKU INC.",
+            "ratio": 13
+        },
+        {
+            "ticker": "ROST",
+            "descripcion": "Ross Stores",
+            "ratio": 1
+        },
+        {
+            "ticker": "RTX",
+            "descripcion": "CEDEAR UNITED TECHNOLOGIES CORP. ESCRIT.",
+            "ratio": 5
+        },
+        {
+            "ticker": "SAN",
+            "descripcion": "Banco Santander",
+            "ratio": 0.25
+        },
+        {
+            "ticker": "SAP",
+            "descripcion": "Sap Se",
+            "ratio": 6
+        },
+        {
+            "ticker": "SATL",
+            "descripcion": "Satellogic",
+            "ratio": 1
+        },
+        {
+            "ticker": "SBS",
+            "descripcion": "Companhia de Saneamento Básico do Estado de São Paulo",
+            "ratio": 1
+        },
+        {
+            "ticker": "SBSP3",
+            "descripcion": "CEDEAR CIA DE SANEAMIENTO BASICO DE SP SA",
+            "ratio": 1
+        },
+        {
+            "ticker": "SBUX",
+            "descripcion": "Starbucks Corporation",
+            "ratio": 12
+        },
+        {
+            "ticker": "SCCO",
+            "descripcion": "Southern Copper Corp",
+            "ratio": 2
+        },
+        {
+            "ticker": "SCHW",
+            "descripcion": "CEDEAR CHARLES SCHWAB CORP.",
+            "ratio": 13
+        },
+        {
+            "ticker": "SDA",
+            "descripcion": "CEDEAR SUNCAR TECHNOLOGY GROUP INC",
+            "ratio": 2
+        },
+        {
+            "ticker": "SE",
+            "descripcion": "Sea",
+            "ratio": 32
+        },
+        {
+            "ticker": "SH",
+            "descripcion": "CEDEAR PROSHARES SHORT S&P500",
+            "ratio": 8
+        },
+        {
+            "ticker": "SHEL",
+            "descripcion": "Royal Dutch Shell",
+            "ratio": 2
+        },
+        {
+            "ticker": "SHOP",
+            "descripcion": "Shopify",
+            "ratio": 107
+        },
+        {
+            "ticker": "SI",
+            "descripcion": "Silvergate Bancorp",
+            "ratio": 10
+        },
+        {
+            "ticker": "SID",
+            "descripcion": "Companhia Siderúrgica Nacional",
+            "ratio": 0.125
+        },
+        {
+            "ticker": "SIEGY",
+            "descripcion": "Siemens Ag",
+            "ratio": 3
+        },
+        {
+            "ticker": "SLB",
+            "descripcion": "Schlumberger",
+            "ratio": 3
+        },
+        {
+            "ticker": "SLV",
+            "descripcion": "CEDEAR ETF ISHARES SILVER TRUST (SLV)",
+            "ratio": 6
+        },
+        {
+            "ticker": "SMH",
+            "descripcion": "CEDEAR VAN ECK VECTORS ETF TRUST",
+            "ratio": 50
+        },
+        {
+            "ticker": "SMSN",
+            "descripcion": "CEDEAR SAMSUNG",
+            "ratio": 1
+        },
+        {
+            "ticker": "SNA",
+            "descripcion": "Snap-On",
+            "ratio": 6
+        },
+        {
+            "ticker": "SNAP",
+            "descripcion": "Snap",
+            "ratio": 6
+        },
+        {
+            "ticker": "SNOW",
+            "descripcion": "Snowflake",
+            "ratio": 30
+        },
+        {
+            "ticker": "SONY",
+            "descripcion": "Sony Group Corporation",
+            "ratio": 8
+        },
+        {
+            "ticker": "SPCE",
+            "descripcion": "CEDEAR VIRGIN GALACTIC HOLDINGS INC.",
+            "ratio": 0.5
+        },
+        {
+            "ticker": "SPGI",
+            "descripcion": "CEDEAR S&P GLOBAL INC.",
+            "ratio": 1
+        },
+        {
+            "ticker": "SPOT",
+            "descripcion": "Spotify Technology",
+            "ratio": 28
+        },
+        {
+            "ticker": "SPXL",
+            "descripcion": "CEDEAR DIREXION DAILY S&P 500 BULL 3X",
+            "ratio": 25
+        },
+        {
+            "ticker": "SPY",
+            "descripcion": "Spdr S&P 500",
+            "ratio": 20
+        },
+        {
+            "ticker": "STLA",
+            "descripcion": "CEDEAR STELLANTIS NV",
+            "ratio": 5
+        },
+        {
+            "ticker": "STNE",
+            "descripcion": "CEDEAR STONECO LTD",
+            "ratio": 3
+        },
+        {
+            "ticker": "SUZ",
+            "descripcion": "Suzano Papel E Celulose",
+            "ratio": 1
+        },
+        {
+            "ticker": "SUZB3",
+            "descripcion": "CEDEAR SUZANO S.A",
+            "ratio": 1
+        },
+        {
+            "ticker": "SWKS",
+            "descripcion": "CEDEAR SKYWORKS SOLUTIONS INC.",
+            "ratio": 21
+        },
+        {
+            "ticker": "SYY",
+            "descripcion": "CEDEAR SYSCO CORPORATION",
+            "ratio": 8
+        },
+        {
+            "ticker": "T",
+            "descripcion": "At &T",
+            "ratio": 3
+        },
+        {
+            "ticker": "TCOM",
+            "descripcion": "TRIP.COM Group",
+            "ratio": 1
+        },
+        {
+            "ticker": "TEAM",
+            "descripcion": "CEDEAR ATLASSIAN CORPORATION (TEAM)",
+            "ratio": 47
+        },
+        {
+            "ticker": "TEFO",
+            "descripcion": "Telefonica",
+            "ratio": 1
+        },
+        {
+            "ticker": "TEM",
+            "descripcion": "CEDEAR TEMPUS AI INC (TEM)",
+            "ratio": 12
+        },
+        {
+            "ticker": "TEN",
+            "descripcion": "Tenaris",
+            "ratio": 1
+        },
+        {
+            "ticker": "TGT",
+            "descripcion": "Target Corporation",
+            "ratio": 24
+        },
+        {
+            "ticker": "TIIAY",
+            "descripcion": "CED TELECOM ITAL",
+            "ratio": 1
+        },
+        {
+            "ticker": "TIMB",
+            "descripcion": "Tim Participações",
+            "ratio": 1
+        },
+        {
+            "ticker": "TIMS3",
+            "descripcion": "CEDEAR TIM S.A.",
+            "ratio": 1
+        },
+        {
+            "ticker": "TJX",
+            "descripcion": "CEDEAR TJX COMPANIES INC.\/THE",
+            "ratio": 22
+        },
+        {
+            "ticker": "TM",
+            "descripcion": "Toyota Motor Corporation",
+            "ratio": 15
+        },
+        {
+            "ticker": "TMO",
+            "descripcion": "Thermo Fisher Scientific",
+            "ratio": 22
+        },
+        {
+            "ticker": "TMUS",
+            "descripcion": "CEDEAR T-MOBILE US INC.",
+            "ratio": 33
+        },
+        {
+            "ticker": "TQQQ",
+            "descripcion": "CEDEAR PROSHARES ULTRAPRO QQQ ETF",
+            "ratio": 25
+        },
+        {
+            "ticker": "TRIP",
+            "descripcion": "Tripadvisor",
+            "ratio": 2
+        },
+        {
+            "ticker": "TRVV",
+            "descripcion": "The Travelers",
+            "ratio": 6
+        },
+        {
+            "ticker": "TSLA",
+            "descripcion": "Tesla",
+            "ratio": 15
+        },
+        {
+            "ticker": "TSM",
+            "descripcion": "CEDEAR TAIWAN SE",
+            "ratio": 9
+        },
+        {
+            "ticker": "TTE",
+            "descripcion": "TotalEnergies SE",
+            "ratio": 1
+        },
+        {
+            "ticker": "TTM",
+            "descripcion": "Tata Motors",
+            "ratio": 1
+        },
+        {
+            "ticker": "TV",
+            "descripcion": "Grupo Televisa",
+            "ratio": 1
+        },
+        {
+            "ticker": "TWLO",
+            "descripcion": "CEDEAR TWILIO INC.",
+            "ratio": 1
+        },
+        {
+            "ticker": "TXN",
+            "descripcion": "CEDEAR TEXAS",
+            "ratio": 5
+        },
+        {
+            "ticker": "TXR",
+            "descripcion": "Ternium",
+            "ratio": 4
+        },
+        {
+            "ticker": "UAL",
+            "descripcion": "United Airlines Holdings",
+            "ratio": 1
+        },
+        {
+            "ticker": "UBER",
+            "descripcion": "Uber Technologies",
+            "ratio": 2
+        },
+        {
+            "ticker": "UGP",
+            "descripcion": "Ultrapar Participações",
+            "ratio": 1
+        },
+        {
+            "ticker": "UL",
+            "descripcion": "Unilever",
+            "ratio": 3
+        },
+        {
+            "ticker": "UNH",
+            "descripcion": "UnitedHealth Group",
+            "ratio": 33
+        },
+        {
+            "ticker": "UNP",
+            "descripcion": "Union Pacific",
+            "ratio": 20
+        },
+        {
+            "ticker": "UPST",
+            "descripcion": "Upstart Hldgs",
+            "ratio": 5
+        },
+        {
+            "ticker": "URA",
+            "descripcion": "CEDEAR GLOBAL X URANIUM ETF",
+            "ratio": 5
+        },
+        {
+            "ticker": "URBN",
+            "descripcion": "Urban Outfitters",
+            "ratio": 1
+        },
+        {
+            "ticker": "USB",
+            "descripcion": "U.S. Bancorp",
+            "ratio": 5
+        },
+        {
+            "ticker": "USO",
+            "descripcion": "CEDEAR UNITED STATE OIL FUND LP (USO)",
+            "ratio": 15
+        },
+        {
+            "ticker": "V",
+            "descripcion": "Visa",
+            "ratio": 18
+        },
+        {
+            "ticker": "VALE",
+            "descripcion": "Vale",
+            "ratio": 2
+        },
+        {
+            "ticker": "VALE3",
+            "descripcion": "CEDEAR VALE S.A.",
+            "ratio": 1
+        },
+        {
+            "ticker": "VEA",
+            "descripcion": "CEDEAR VANGUARD FTSE DEVELOPED MARKETS ETF",
+            "ratio": 10
+        },
+        {
+            "ticker": "VIG",
+            "descripcion": "CEDEAR ETF VANGUARD DIVIDEND APPRECIATION (VIG)",
+            "ratio": 39
+        },
+        {
+            "ticker": "VIST",
+            "descripcion": "Vista Energy",
+            "ratio": 3
+        },
+        {
+            "ticker": "VIV",
+            "descripcion": "Telefônica Brasil",
+            "ratio": 1
+        },
+        {
+            "ticker": "VIVT3",
+            "descripcion": "CEDEAR TELEFONICA BRASIL S.A.",
+            "ratio": 1
+        },
+        {
+            "ticker": "VOD",
+            "descripcion": "Vodafone Group Plc",
+            "ratio": 1
+        },
+        {
+            "ticker": "VRSN",
+            "descripcion": "Verisign",
+            "ratio": 6
+        },
+        {
+            "ticker": "VRTX",
+            "descripcion": "CEDEAR VERTEX PHARMACEUTICALS INC (VRTX)",
+            "ratio": 101
+        },
+        {
+            "ticker": "VST",
+            "descripcion": "CEDEARV VISTRA CORPORATION (VST)",
+            "ratio": 26
+        },
+        {
+            "ticker": "VXX",
+            "descripcion": "CEDEAR IPATH SERIES B S&P 500 VIX ETF",
+            "ratio": 5
+        },
+        {
+            "ticker": "VZ",
+            "descripcion": "Verizon Communications",
+            "ratio": 4
+        },
+        {
+            "ticker": "WBA",
+            "descripcion": "Walgreens Boots Alliance",
+            "ratio": 3
+        },
+        {
+            "ticker": "WBO",
+            "descripcion": "Weibo Corporation",
+            "ratio": 6
+        },
+        {
+            "ticker": "WEGE3",
+            "descripcion": "CEDEAR WEG S.A.",
+            "ratio": 1
+        },
+        {
+            "ticker": "WFC",
+            "descripcion": "Wells Fargo & Co.",
+            "ratio": 5
+        },
+        {
+            "ticker": "WMT",
+            "descripcion": "CEDEAR WAL-MART STORES INC. ESCRIT.",
+            "ratio": 18
+        },
+        {
+            "ticker": "X",
+            "descripcion": "United States Steel",
+            "ratio": 3
+        },
+        {
+            "ticker": "XLB",
+            "descripcion": "CEDEAR THE MATERIALS SELECT SECTOR SPDR FUND",
+            "ratio": 18
+        },
+        {
+            "ticker": "XLC",
+            "descripcion": "CEDEAR THE COMMUNICATION SERVICES SELECT SECTOR SPDR FUND",
+            "ratio": 19
+        },
+        {
+            "ticker": "XLE",
+            "descripcion": "Energy Select Sector Spdr Fund",
+            "ratio": 2
+        },
+        {
+            "ticker": "XLF",
+            "descripcion": "Financial Select Sector Spdr Fund",
+            "ratio": 2
+        },
+        {
+            "ticker": "XLI",
+            "descripcion": "CEDEAR THE INDUSTRIAL SELECT SECTOR SPDR FUND",
+            "ratio": 28
+        },
+        {
+            "ticker": "XLK",
+            "descripcion": "CEDEAR THE TECHNOLOGY SELECT SECTOR SPDR FUND",
+            "ratio": 46
+        },
+        {
+            "ticker": "XLP",
+            "descripcion": "CEDEAR THE CONSUMER STAPLES SELECT SECTOR SPDR FUND",
+            "ratio": 16
+        },
+        {
+            "ticker": "XLRE",
+            "descripcion": "CEDEAR THE REAL ESTATE SELECT SECTOR SPDR FUND",
+            "ratio": 9
+        },
+        {
+            "ticker": "XLU",
+            "descripcion": "CEDEAR UTILITIES SELECT SECTOR SPDR FUND",
+            "ratio": 15
+        },
+        {
+            "ticker": "XLV",
+            "descripcion": "CEDEAR THE HEALTH CARE SELECT SECTOR SPDR FUND",
+            "ratio": 29
+        },
+        {
+            "ticker": "XLY",
+            "descripcion": "CEDEAR THE CONSUMER DISCRETIONARY SELECT SECTOR SPDR FUND",
+            "ratio": 43
+        },
+        {
+            "ticker": "XOM",
+            "descripcion": "Exxon Mobil Corporation",
+            "ratio": 10
+        },
+        {
+            "ticker": "XP",
+            "descripcion": "XP",
+            "ratio": 1
+        },
+        {
+            "ticker": "XPEV",
+            "descripcion": "CEDEAR XPENG INC (XPEV)",
+            "ratio": 4
+        },
+        {
+            "ticker": "XROX",
+            "descripcion": "Xerox Holding Corporation",
+            "ratio": 1
+        },
+        {
+            "ticker": "XYZ",
+            "descripcion": "CEDEAR BLOCK INC.",
+            "ratio": 20
+        },
+        {
+            "ticker": "YELP",
+            "descripcion": "Yelp",
+            "ratio": 2
+        },
+        {
+            "ticker": "YZCA",
+            "descripcion": "CEDEAR YANZHOU COAL MINING CO. LIMITED",
+            "ratio": 1
+        },
+        {
+            "ticker": "ZM",
+            "descripcion": "Zoom Video Communications",
+            "ratio": 47
+        }
+    ]
+}
