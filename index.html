@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Arbitraje CEDEARs</title>
+  <title>Debug Arbitraje CEDEARs</title>
   <style>
     body { font-family: Arial, sans-serif; background:#f9f9f9; padding:20px; }
     table { border-collapse: collapse; width:100%; background:#fff; font-size:14px; }
@@ -16,8 +16,8 @@
 </head>
 <body>
 
-<h1>Monitor de Arbitraje de CEDEARs</h1>
-<p>Fuentes: <strong>data912.com</strong>, <strong>dolarapi.com</strong>, <strong>Yahoo Finance</strong>, <strong>dolarhoy.dev.ar</strong>.</p>
+<h1>Debug Arbitraje CEDEARs</h1>
+<p>Abre la consola del navegador (F12 → Consola) para ver los logs de ejecución.</p>
 
 <table>
   <thead>
@@ -38,19 +38,29 @@
 <script>
 const URL_CEDEARS = "https://data912.com/live/arg_cedears";
 const URL_DOLAR = "https://dolarapi.com/v1/dolares";
-const URL_RATIOS = "https://dolarhoy.dev.ar/ratios.json"; // ✅ tu dominio
+const URL_RATIOS = "https://dolarhoy.dev.ar/ratios.json";
 
 const fmt = (x, d=2) => (x==null || isNaN(x)) ? "–" : Number(x).toFixed(d);
 const arrow = v => v>0 ? "▲" : v<0 ? "▼" : "";
 const clsPN = v => v>0 ? "positivo" : v<0 ? "negativo" : "muted";
 
-// === Obtiene precio real en USD desde Yahoo Finance ===
+// === Yahoo Finance ===
 async function getPrecioUSDYahoo(symbol) {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}`;
+  console.log("Consultando Yahoo:", url);
   try {
-    const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}`);
+    const r = await fetch(url);
+    if (!r.ok) {
+      console.warn(`❌ Yahoo ${symbol}: respuesta HTTP ${r.status}`);
+      return null;
+    }
     const j = await r.json();
-    return j.chart.result[0].meta.regularMarketPrice || null;
-  } catch {
+    const meta = j.chart?.result?.[0]?.meta;
+    const price = meta?.regularMarketPrice ?? null;
+    console.log(`✅ ${symbol}: precio en USA =`, price);
+    return price;
+  } catch (err) {
+    console.error(`⚠️ Error al obtener ${symbol} de Yahoo:`, err);
     return null;
   }
 }
@@ -58,19 +68,29 @@ async function getPrecioUSDYahoo(symbol) {
 async function fetchJSON(url) {
   const res = await fetch(url);
   const txt = await res.text();
-  try { return JSON.parse(txt); } 
-  catch(e) { console.error("Error JSON", url, e, txt.slice(0,200)); return null; }
+  try {
+    const j = JSON.parse(txt);
+    console.log("✅ Cargado:", url, "→", j.length || Object.keys(j).length, "registros");
+    return j;
+  } catch (e) {
+    console.error("❌ Error parseando JSON:", url, e);
+    console.log(txt.slice(0,300));
+    return null;
+  }
 }
 
 async function loadData() {
   try {
+    console.log("🚀 Iniciando carga...");
     const [cedears, dolarData, ratiosData] = await Promise.all([
       fetchJSON(URL_CEDEARS),
       fetchJSON(URL_DOLAR),
       fetchJSON(URL_RATIOS)
     ]);
 
-    const ccl = dolarData.find(d => d.casa === "contadoconliqui").venta;
+    const ccl = dolarData.find(d => d.casa === "contadoconliqui")?.venta;
+    console.log("💵 CCL venta:", ccl);
+
     const ratios = ratiosData.ratios || ratiosData;
     const mapRatios = Object.fromEntries(ratios.map(r => [r.ticker, r.ratio]));
     const mapCedears = Object.fromEntries(cedears.map(c => [c.symbol, c]));
@@ -79,21 +99,26 @@ async function loadData() {
     tbody.innerHTML = "";
 
     for (const symbol in mapCedears) {
-      if (symbol.endsWith("D")) continue; // Saltar los tickers en USD
+      if (symbol.endsWith("D")) continue;
       const cedearARS = mapCedears[symbol];
       const cedearUSD = mapCedears[symbol + "D"];
       const ratio = mapRatios[symbol];
-      if (!ratio) continue;
+      if (!ratio) {
+        console.log(`⏭️ ${symbol}: sin ratio definido`);
+        continue;
+      }
 
       const precioARS = Number(cedearARS?.c) || 0;
       const precioUSD = Number(cedearUSD?.c) || 0;
+      console.log(`📊 ${symbol}: ARS=${precioARS}, USD=${precioUSD}, ratio=${ratio}`);
 
-      // Obtener precio real USA desde Yahoo
       const precioRealUSA = await getPrecioUSDYahoo(symbol);
-      if (!precioRealUSA) continue; // si no existe el ticker, salta
+      if (!precioRealUSA) {
+        console.warn(`⚠️ ${symbol}: no se encontró en Yahoo`);
+        continue;
+      }
 
       const precioEsperadoARS = precioRealUSA * ratio * ccl;
-
       const diffARS = ((precioARS - precioEsperadoARS) / precioEsperadoARS) * 100;
       const diffUSD = ((precioUSD - precioRealUSA) / precioRealUSA) * 100;
 
@@ -111,15 +136,16 @@ async function loadData() {
       tbody.appendChild(tr);
     }
 
+    console.log("✅ Carga completa.");
+
   } catch (e) {
-    console.error("Error general:", e);
+    console.error("❌ Error general:", e);
     document.getElementById("tabla").innerHTML =
       `<tr><td colspan="8" class="muted">Error al cargar datos.</td></tr>`;
   }
 }
 
 loadData();
-setInterval(loadData, 90000); // refresca cada 90 segundos
 </script>
 
 </body>
