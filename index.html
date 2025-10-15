@@ -1,155 +1,279 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Arbitraje CEDEARs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: Arial, sans-serif; background:#f9f9f9; padding:20px; }
-    .header { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
-    .pill { background:#fff; border:1px solid #ccc; padding:6px 10px; border-radius:999px; font-size:14px; }
-    table { border-collapse: collapse; width:100%; background:#fff; font-size:14px; margin-top:12px; }
-    th, td { border:1px solid #ccc; padding:6px; text-align:center; }
-    th { background:#333; color:#fff; position:sticky; top:0; }
-    tr:nth-child(even){ background:#f4f4f4; }
-    .positivo{ color:green; font-weight:bold; }
-    .negativo{ color:red; font-weight:bold; }
-    .muted{ color:#777; }
-    .left { text-align:left; }
+    :root { --bg:#f7f7f7; --fg:#222; --muted:#777; --border:#ddd; --head:#333; --pos:#0a8a0a; --neg:#c62828; }
+    html,body { margin:0; padding:0; background:var(--bg); color:var(--fg); font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+    .wrap { max-width:1200px; margin:32px auto; padding:0 16px; }
+    .head {
+      display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:space-between; margin-bottom:12px;
+    }
+    .title { display:flex; align-items:center; gap:12px; }
+    .pill { background:#fff; border:1px solid var(--border); padding:6px 10px; border-radius:999px; font-size:14px; }
+    .pill small { color:var(--muted); font-weight:400; }
+    .toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .input {
+      background:#fff; border:1px solid var(--border); border-radius:8px; padding:8px 10px; min-width:220px;
+      font-size:14px;
+    }
+    table { width:100%; border-collapse:collapse; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.04); }
+    th, td { border:1px solid var(--border); padding:8px 10px; text-align:center; font-size:14px; }
+    th { position:sticky; top:0; background:var(--head); color:#fff; z-index:1; cursor:pointer; user-select:none; }
+    th.left, td.left { text-align:left; }
+    tr:nth-child(even) td { background:#fafafa; }
+    .muted { color:var(--muted); }
+    .pos { color:var(--pos); font-weight:700; }
+    .neg { color:var(--neg); font-weight:700; }
+    .sort-ind { opacity:.9; margin-left:6px; font-size:11px; }
+    abbr { text-decoration:underline dotted; cursor:help; }
+    .footnote { margin-top:10px; color:var(--muted); font-size:12px; }
   </style>
 </head>
 <body>
+<div class="wrap">
 
-<div class="header">
-  <h1 style="margin:0;">Arbitraje CEDEARs</h1>
-  <span id="cclPill" class="pill">CCL: –</span>
+  <div class="head">
+    <div class="title">
+      <h1 style="margin:0;">Arbitraje CEDEARs</h1>
+      <span id="pillCCL" class="pill" title="Contado con Liquidación (venta) según DolarAPI">CCL: –</span>
+    </div>
+    <div class="toolbar">
+      <input id="search" class="input" type="text" placeholder="Filtrar por ticker… (p. ej. AAPL)" />
+    </div>
+  </div>
+
+  <table id="tabla">
+    <thead>
+      <tr>
+        <th class="left" data-key="ticker" data-type="str">
+          <abbr title="Símbolo del CEDEAR en el mercado argentino">Ticker</abbr>
+          <span class="sort-ind"></span>
+        </th>
+        <th data-key="ratio" data-type="num">
+          <abbr title="Relación CEDEAR:Acción subyacente (por ej. 20:1)">Ratio</abbr>
+          <span class="sort-ind"></span>
+        </th>
+        <th data-key="precioUSA" data-type="num">
+          <abbr title="Precio de la acción original en el mercado de EE.UU. (US$)">Acción USA (USD)</abbr>
+          <span class="sort-ind"></span>
+        </th>
+        <th data-key="precioARS" data-type="num">
+          <abbr title="Último precio del CEDEAR en pesos argentinos">CEDEAR (ARS)</abbr>
+          <span class="sort-ind"></span>
+        </th>
+        <th data-key="precioUSDcedear" data-type="num">
+          <abbr title="Precio del CEDEAR expresado en dólares (símbolo con sufijo D)">CEDEAR (USD)</abbr>
+          <span class="sort-ind"></span>
+        </th>
+        <th data-key="precioCEDEAR_esp_USD" data-type="num">
+          <abbr title="Precio teórico del CEDEAR en USD = (Acción USA / Ratio)">Precio teórico CEDEAR (USD)</abbr>
+          <span class="sort-ind"></span>
+        </th>
+        <th data-key="precioEsperadoARS" data-type="num">
+          <abbr title="Precio teórico del CEDEAR en ARS = Acción USA × Ratio × CCL">Precio teórico CEDEAR (ARS)</abbr>
+          <span class="sort-ind"></span>
+        </th>
+        <th data-key="diffARS" data-type="num">
+          <abbr title="(CEDEAR ARS − Teórico ARS) / Teórico ARS">Diferencia % ARS</abbr>
+          <span class="sort-ind"></span>
+        </th>
+        <th data-key="diffUSD" data-type="num">
+          <abbr title="(CEDEAR USD − Teórico USD) / Teórico USD">Diferencia % USD</abbr>
+          <span class="sort-ind"></span>
+        </th>
+      </tr>
+    </thead>
+    <tbody id="tbody">
+      <tr><td colspan="9" class="muted">Cargando…</td></tr>
+    </tbody>
+  </table>
+
+  <div id="meta" class="footnote"></div>
+
 </div>
-<p style="margin:8px 0 16px;">Fuentes: <strong>data912.com</strong>, <strong>dolarapi.com</strong>, <strong>dolarhoy.dev.ar</strong></p>
-
-<table>
-  <thead>
-    <tr>
-      <th class="left">Ticker</th>
-      <th>Ratio</th>
-      <th>Cotización USA (USD)</th>
-      <th>Precio CEDEAR (ARS)</th>
-      <th>Precio CEDEAR (USD)</th>
-      <th>Precio CEDEAR esperado (USD)</th>
-      <th>Precio Esperado (ARS)</th>
-      <th>Diferencia % ARS</th>
-      <th>Diferencia % USD</th>
-    </tr>
-  </thead>
-  <tbody id="tabla"></tbody>
-</table>
 
 <script>
-const URL_CEDEARS = "https://data912.com/live/arg_cedears";
-const URL_USA     = "https://data912.com/live/usa_stocks";
-const URL_DOLAR   = "https://dolarapi.com/v1/dolares";
-const URL_RATIOS  = "https://dolarhoy.dev.ar/ratios.json"; // ajusta si lo guardaste en otra ruta
+/* Endpoints */
+const URL_CEDEARS = "https://data912.com/live/arg_cedears"; // CEDEARs ARS y versión D (USD)
+const URL_USA     = "https://data912.com/live/usa_stocks";  // Acción USA (USD), campo c
+const URL_DOLAR   = "https://dolarapi.com/v1/dolares";       // CCL venta
+const URL_RATIOS  = "https://dolarhoy.dev.ar/ratios.json";   // { ticker, ratio }
 
-const fmt  = (x, d=2) => (x==null || isNaN(x)) ? "–" : Number(x).toFixed(d);
-const arrow= v => v>0 ? "▲" : v<0 ? "▼" : "";
-const clsPN= v => v>0 ? "positivo" : v<0 ? "negativo" : "muted";
+/* Utils */
+const fmt      = (x, d=2) => (x==null || isNaN(x)) ? "–" : Number(x).toFixed(d);
+const arrow    = v => v>0 ? "▲" : (v<0 ? "▼" : "");
+const clsTrend = v => v>0 ? "pos" : (v<0 ? "neg" : "muted");
 
-async function fetchJSON(url){
+/* State */
+let rows = [];      // filas calculadas
+let viewRows = [];  // filas filtradas/ordenadas
+let sortState = { key:"", dir: 0 }; // dir: 1 asc, -1 desc, 0 none
+let CCL = null;
+
+/* Fetch helper */
+async function j(url){
   const r = await fetch(url);
   const t = await r.text();
   try { return JSON.parse(t); } catch(e){ console.error("JSON inválido en", url, e, t.slice(0,200)); return null; }
 }
 
-// helper por si algún símbolo USA viene con sufijos (p.ej. ABEV3)
-function findUSA(mapUSA, symbol) {
-  if (mapUSA[symbol]) return mapUSA[symbol];
-  // intentar quitar dígitos/sufijos si no está (casos puntuales)
-  const alt = symbol.replace(/\d+$/, "");
-  return mapUSA[alt] || null;
-}
+/* Build dataset */
+async function loadAll(){
+  const [argCedears, usaStocks, dolar, ratiosData] = await Promise.all([
+    j(URL_CEDEARS), j(URL_USA), j(URL_DOLAR), j(URL_RATIOS)
+  ]);
 
-async function loadData(){
-  try{
-    const [cedears, usaStocks, dolarData, ratiosData] = await Promise.all([
-      fetchJSON(URL_CEDEARS),
-      fetchJSON(URL_USA),
-      fetchJSON(URL_DOLAR),
-      fetchJSON(URL_RATIOS)
-    ]);
+  // CCL (venta) + pill
+  const cclObj = Array.isArray(dolar) ? dolar.find(d => d.casa === "contadoconliqui") : null;
+  CCL = cclObj ? Number(cclObj.venta) : null;
+  document.getElementById("pillCCL").textContent =
+    CCL ? `CCL: ${fmt(CCL,1)} • ${new Date(cclObj.fechaActualizacion).toLocaleString()}` : "CCL: –";
 
-    // CCL venta + etiqueta de fecha
-    const cclObj = Array.isArray(dolarData) ? dolarData.find(d => d.casa === "contadoconliqui") : null;
-    const CCL    = cclObj ? Number(cclObj.venta) : null;
-    const cclLbl = CCL ? `CCL venta: ${fmt(CCL,1)} (act: ${new Date(cclObj.fechaActualizacion).toLocaleString()})` : "CCL: –";
-    document.getElementById("cclPill").textContent = cclLbl;
-
-    if (!Array.isArray(cedears) || !Array.isArray(usaStocks)) {
-      document.getElementById("tabla").innerHTML = `<tr><td colspan="9" class="muted">Sin datos válidos</td></tr>`;
-      return;
-    }
-
-    const ratios = (ratiosData && (ratiosData.ratios || ratiosData)) || [];
-    const mapRatios  = Object.fromEntries(ratios.map(r => [r.ticker, r.ratio]));
-    const mapUSA     = Object.fromEntries(usaStocks.map(s => [s.symbol, s]));
-    const mapCedears = Object.fromEntries(cedears.map(c => [c.symbol, c]));
-
-    const tbody = document.getElementById("tabla");
-    tbody.innerHTML = "";
-
-    // Recorremos solo los tickers ARS (no los que terminan en D)
-    for (const symbol in mapCedears) {
-      if (symbol.endsWith("D")) continue;
-
-      const ratio = mapRatios[symbol];
-      if (!ratio) continue; // si no tenemos ratio, no podemos arbitrar correctamente
-
-      const rowARS = mapCedears[symbol];
-      const rowUSDcedear = mapCedears[symbol + "D"]; // misma base + "D" → precio CEDEAR en USD
-      const rowUSA = findUSA(mapUSA, symbol);        // precio USA real desde usa_stocks
-
-      // Necesitamos al menos USA y ARS para evaluar
-      if (!rowUSA || !rowARS || !CCL) continue;
-
-      const precioUSA = Number(rowUSA.c) || null;             // Cotización USA (USD) — campo c
-      const precioARS = Number(rowARS.c) || null;              // Precio CEDEAR (ARS) — campo c
-      const precioUSDcedear = Number(rowUSDcedear?.c) || null; // Precio CEDEAR en USD — campo c del ticker + "D"
-
-      // Precio CEDEAR esperado (USD) = Cotización USA / ratio
-      const precioCEDEAR_esp_USD = (precioUSA && ratio) ? (precioUSA / ratio) : null;
-
-      // Precio esperado (ARS) = Cotización USA * ratio * CCL
-      const precioEsperadoARS = (precioUSA && ratio && CCL) ? (precioUSA * ratio * CCL) : null;
-
-      // Diferencias
-      const diffARS = (precioARS!=null && precioEsperadoARS)
-        ? ((precioARS - precioEsperadoARS) / precioEsperadoARS) * 100
-        : null;
-
-      const diffUSD = (precioUSDcedear!=null && precioCEDEAR_esp_USD)
-        ? ((precioUSDcedear - precioCEDEAR_esp_USD) / precioCEDEAR_esp_USD) * 100
-        : null;
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td class="left">${symbol}</td>
-        <td>${ratio}:1</td>
-        <td>${fmt(precioUSA)}</td>
-        <td>${fmt(precioARS)}</td>
-        <td>${fmt(precioUSDcedear)}</td>
-        <td>${fmt(precioCEDEAR_esp_USD)}</td>
-        <td>${fmt(precioEsperadoARS)}</td>
-        <td class="${diffARS==null?'muted':clsPN(diffARS)}">${diffARS==null?'–':(arrow(diffARS)+' '+fmt(diffARS)+'%')}</td>
-        <td class="${diffUSD==null?'muted':clsPN(diffUSD)}">${diffUSD==null?'–':(arrow(diffUSD)+' '+fmt(diffUSD)+'%')}</td>
-      `;
-      tbody.appendChild(tr);
-    }
-  }catch(e){
-    console.error("Error:", e);
-    document.getElementById("tabla").innerHTML =
-      `<tr><td colspan="9" class="muted">Error al cargar datos.</td></tr>`;
+  if (!Array.isArray(argCedears) || !Array.isArray(usaStocks) || !ratiosData){
+    document.getElementById("tbody").innerHTML = `<tr><td colspan="9" class="muted">Sin datos válidos</td></tr>`;
+    return;
   }
+
+  const ratios = ratiosData.ratios || ratiosData;
+  const mapRatio  = Object.fromEntries(ratios.map(r => [String(r.ticker).toUpperCase(), Number(r.ratio)]));
+  const mapARSUSD = Object.fromEntries(argCedears.map(o => [String(o.symbol).toUpperCase(), o]));
+  const mapUSA    = Object.fromEntries(usaStocks.map(o => [String(o.symbol).toUpperCase(), o]));
+
+  // Construir filas
+  const out = [];
+  for (const [sym, ar] of Object.entries(mapARSUSD)) {
+    if (sym.endsWith("D")) continue; // saltar versión en USD
+    const ratio = mapRatio[sym];
+    if (!ratio) continue;
+
+    const usdRow = mapARSUSD[sym + "D"]; // CEDEAR USD
+    // acción USA (puede haber símbolos con sufijos numéricos, intentamos el base)
+    let usaRow = mapUSA[sym];
+    if (!usaRow) {
+      const base = sym.replace(/\d+$/,"");
+      usaRow = mapUSA[base];
+    }
+
+    const precioUSA          = usaRow ? Number(usaRow.c) : null;           // Acción USA (USD)
+    const precioARS          = ar && ar.c != null ? Number(ar.c) : null;   // CEDEAR (ARS)
+    const precioUSDcedear    = usdRow && usdRow.c != null ? Number(usdRow.c) : null; // CEDEAR (USD)
+    const precioCEDEAR_esp_USD = (precioUSA!=null && ratio) ? (precioUSA / ratio) : null; // teórico USD
+    const precioEsperadoARS  = (precioUSA!=null && ratio && CCL) ? (precioUSA * ratio * CCL) : null; // teórico ARS
+    const diffARS = (precioARS!=null && precioEsperadoARS) ? ((precioARS - precioEsperadoARS) / precioEsperadoARS) * 100 : null;
+    const diffUSD = (precioUSDcedear!=null && precioCEDEAR_esp_USD) ? ((precioUSDcedear - precioCEDEAR_esp_USD) / precioCEDEAR_esp_USD) * 100 : null;
+
+    out.push({
+      ticker: sym,
+      ratio,
+      precioUSA,
+      precioARS,
+      precioUSDcedear,
+      precioCEDEAR_esp_USD,
+      precioEsperadoARS,
+      diffARS,
+      diffUSD
+    });
+  }
+
+  rows = out;
+  viewRows = rows.slice();
+  render();
+  updateMeta();
 }
 
-loadData();
-setInterval(loadData, 90000); // refresca cada 90s
+/* Render table */
+function render(){
+  const tb = document.getElementById("tbody");
+  if (!viewRows.length){
+    tb.innerHTML = `<tr><td colspan="9" class="muted">Sin resultados</td></tr>`;
+    return;
+  }
+  tb.innerHTML = viewRows.map(r => `
+    <tr>
+      <td class="left">${r.ticker}</td>
+      <td>${r.ratio ? `${r.ratio}:1` : "–"}</td>
+      <td>${fmt(r.precioUSA)}</td>
+      <td>${fmt(r.precioARS)}</td>
+      <td>${fmt(r.precioUSDcedear)}</td>
+      <td>${fmt(r.precioCEDEAR_esp_USD)}</td>
+      <td>${fmt(r.precioEsperadoARS)}</td>
+      <td class="${r.diffARS==null?'muted':clsTrend(r.diffARS)}">${r.diffARS==null?'–':(arrow(r.diffARS)+' '+fmt(r.diffARS)+'%')}</td>
+      <td class="${r.diffUSD==null?'muted':clsTrend(r.diffUSD)}">${r.diffUSD==null?'–':(arrow(r.diffUSD)+' '+fmt(r.diffUSD)+'%')}</td>
+    </tr>
+  `).join("");
+}
+
+/* Search filter */
+document.getElementById("search").addEventListener("input", (e)=>{
+  const q = e.target.value.trim().toUpperCase();
+  viewRows = rows.filter(r => !q || String(r.ticker).includes(q));
+  applySort(); // mantener el orden actual
+  render();
+  updateMeta();
+});
+
+/* Sorting */
+function applySort(){
+  if (!sortState.key || !sortState.dir) return;
+  const {key, dir} = sortState;
+  const ths = document.querySelectorAll("thead th");
+  ths.forEach(th => { const i = th.querySelector(".sort-ind"); if (i) i.textContent = ""; });
+
+  // find current th and set indicator
+  const th = Array.from(ths).find(t => t.dataset.key === key);
+  if (th) th.querySelector(".sort-ind").textContent = dir > 0 ? "▲" : "▼";
+
+  const type = th?.dataset.type || "str";
+  viewRows.sort((a,b)=>{
+    const va = a[key], vb = b[key];
+    if (type === "num"){
+      const na = (va==null || isNaN(va)) ? -Infinity : Number(va);
+      const nb = (vb==null || isNaN(vb)) ? -Infinity : Number(vb);
+      return dir * (na - nb);
+    } else {
+      return dir * String(va||"").localeCompare(String(vb||""));
+    }
+  });
+}
+
+document.querySelectorAll("thead th").forEach(th=>{
+  th.addEventListener("click", ()=>{
+    const key = th.dataset.key;
+    if (!key) return;
+    // toggle dir
+    if (sortState.key !== key) sortState = { key, dir: 1 };
+    else sortState.dir = sortState.dir === 1 ? -1 : (sortState.dir === -1 ? 0 : 1); // asc -> desc -> none
+
+    // clear indicators if none
+    if (sortState.dir === 0){
+      sortState.key = "";
+      document.querySelectorAll(".sort-ind").forEach(el=> el.textContent="");
+      viewRows = rows.filter(r => {
+        const q = document.getElementById("search").value.trim().toUpperCase();
+        return !q || String(r.ticker).includes(q);
+      });
+    } else {
+      applySort();
+    }
+    render();
+  });
+});
+
+/* Meta info */
+function updateMeta(){
+  const meta = document.getElementById("meta");
+  const total = rows.length;
+  const vis   = viewRows.length;
+  meta.textContent = `Mostrando ${vis} de ${total} CEDEARs • Fuente: data912 (20s), DolarAPI`;
+}
+
+/* Kickoff */
+loadAll();
+// refresco suave (no muy frecuente para evitar rate-limits)
+setInterval(loadAll, 120000); // 2 minutos
 </script>
 
 </body>
