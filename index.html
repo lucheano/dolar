@@ -5,28 +5,23 @@
   <title>Arbitraje CEDEARs</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root { --bg:#f7f7f7; --fg:#222; --muted:#777; --border:#ddd; --head:#333; --pos:#0a8a0a; --neg:#c62828; }
+    :root { --bg:#f7f7f7; --fg:#222; --muted:#777; --border:#ddd; --head:#333; --green:#0a8a0a; --red:#c62828; }
     html,body { margin:0; padding:0; background:var(--bg); color:var(--fg); font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
     .wrap { max-width:1200px; margin:32px auto; padding:0 16px; }
-    .head {
-      display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:space-between; margin-bottom:12px;
-    }
+    .head { display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:space-between; margin-bottom:12px; }
     .title { display:flex; align-items:center; gap:12px; }
     .pill { background:#fff; border:1px solid var(--border); padding:6px 10px; border-radius:999px; font-size:14px; }
     .pill small { color:var(--muted); font-weight:400; }
     .toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-    .input {
-      background:#fff; border:1px solid var(--border); border-radius:8px; padding:8px 10px; min-width:220px;
-      font-size:14px;
-    }
+    .input { background:#fff; border:1px solid var(--border); border-radius:8px; padding:8px 10px; min-width:220px; font-size:14px; }
     table { width:100%; border-collapse:collapse; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.04); }
     th, td { border:1px solid var(--border); padding:8px 10px; text-align:center; font-size:14px; }
     th { position:sticky; top:0; background:var(--head); color:#fff; z-index:1; cursor:pointer; user-select:none; }
     th.left, td.left { text-align:left; }
     tr:nth-child(even) td { background:#fafafa; }
     .muted { color:var(--muted); }
-    .pos { color:var(--pos); font-weight:700; }
-    .neg { color:var(--neg); font-weight:700; }
+    .underval { color:var(--green); font-weight:700; } /* dif < 0: subvaluado → verde */
+    .overval  { color:var(--red); font-weight:700; }   /* dif > 0: sobrevaluado → rojo */
     .sort-ind { opacity:.9; margin-left:6px; font-size:11px; }
     abbr { text-decoration:underline dotted; cursor:help; }
     .footnote { margin-top:10px; color:var(--muted); font-size:12px; }
@@ -41,7 +36,7 @@
       <span id="pillCCL" class="pill" title="Contado con Liquidación (venta) según DolarAPI">CCL: –</span>
     </div>
     <div class="toolbar">
-      <input id="search" class="input" type="text" placeholder="Filtrar por ticker… (p. ej. AAPL)" />
+      <input id="search" class="input" type="text" placeholder="Filtrar por ticker… (p. ej., AAPL)" />
     </div>
   </div>
 
@@ -53,7 +48,7 @@
           <span class="sort-ind"></span>
         </th>
         <th data-key="ratio" data-type="num">
-          <abbr title="Relación CEDEAR:Acción subyacente (por ej. 20:1)">Ratio</abbr>
+          <abbr title="Relación CEDEAR:Acción subyacente (p. ej., 20:1)">Ratio</abbr>
           <span class="sort-ind"></span>
         </th>
         <th data-key="precioUSA" data-type="num">
@@ -72,16 +67,16 @@
           <abbr title="Precio teórico del CEDEAR en USD = (Acción USA / Ratio)">Precio teórico CEDEAR (USD)</abbr>
           <span class="sort-ind"></span>
         </th>
+        <th data-key="diffUSD" data-type="num">
+          <abbr title="(CEDEAR USD − Teórico USD) / Teórico USD">Diferencia % USD</abbr>
+          <span class="sort-ind"></span>
+        </th>
         <th data-key="precioEsperadoARS" data-type="num">
-          <abbr title="Precio teórico del CEDEAR en ARS = Acción USA × Ratio × CCL">Precio teórico CEDEAR (ARS)</abbr>
+          <abbr title="Precio teórico del CEDEAR en ARS = (Acción USA / Ratio) × CCL">Precio teórico CEDEAR (ARS)</abbr>
           <span class="sort-ind"></span>
         </th>
         <th data-key="diffARS" data-type="num">
           <abbr title="(CEDEAR ARS − Teórico ARS) / Teórico ARS">Diferencia % ARS</abbr>
-          <span class="sort-ind"></span>
-        </th>
-        <th data-key="diffUSD" data-type="num">
-          <abbr title="(CEDEAR USD − Teórico USD) / Teórico USD">Diferencia % USD</abbr>
           <span class="sort-ind"></span>
         </th>
       </tr>
@@ -103,14 +98,14 @@ const URL_DOLAR   = "https://dolarapi.com/v1/dolares";       // CCL venta
 const URL_RATIOS  = "https://dolarhoy.dev.ar/ratios.json";   // { ticker, ratio }
 
 /* Utils */
-const fmt      = (x, d=2) => (x==null || isNaN(x)) ? "–" : Number(x).toFixed(d);
-const arrow    = v => v>0 ? "▲" : (v<0 ? "▼" : "");
-const clsTrend = v => v>0 ? "pos" : (v<0 ? "neg" : "muted");
+const fmt = (x, d=2) => (x==null || isNaN(x)) ? "–" : Number(x).toFixed(d);
+const arrow = v => v>0 ? "▲" : (v<0 ? "▼" : "");
+const clsVal = v => v==null ? "muted" : (v < 0 ? "underval" : "overval"); // verde si subvaluado, rojo si sobrevaluado
 
 /* State */
-let rows = [];      // filas calculadas
-let viewRows = [];  // filas filtradas/ordenadas
-let sortState = { key:"", dir: 0 }; // dir: 1 asc, -1 desc, 0 none
+let rows = [];
+let viewRows = [];
+let sortState = { key:"", dir: 0 }; // 1 asc, -1 desc, 0 none
 let CCL = null;
 
 /* Fetch helper */
@@ -118,6 +113,13 @@ async function j(url){
   const r = await fetch(url);
   const t = await r.text();
   try { return JSON.parse(t); } catch(e){ console.error("JSON inválido en", url, e, t.slice(0,200)); return null; }
+}
+
+/* Fuzzy USA symbol (p/ casos con sufijos) */
+function findUSA(mapUSA, symbol) {
+  if (mapUSA[symbol]) return mapUSA[symbol];
+  const alt = symbol.replace(/\d+$/,"");
+  return mapUSA[alt] || null;
 }
 
 /* Build dataset */
@@ -142,28 +144,23 @@ async function loadAll(){
   const mapARSUSD = Object.fromEntries(argCedears.map(o => [String(o.symbol).toUpperCase(), o]));
   const mapUSA    = Object.fromEntries(usaStocks.map(o => [String(o.symbol).toUpperCase(), o]));
 
-  // Construir filas
   const out = [];
   for (const [sym, ar] of Object.entries(mapARSUSD)) {
-    if (sym.endsWith("D")) continue; // saltar versión en USD
+    if (sym.endsWith("D")) continue;
     const ratio = mapRatio[sym];
     if (!ratio) continue;
 
-    const usdRow = mapARSUSD[sym + "D"]; // CEDEAR USD
-    // acción USA (puede haber símbolos con sufijos numéricos, intentamos el base)
-    let usaRow = mapUSA[sym];
-    if (!usaRow) {
-      const base = sym.replace(/\d+$/,"");
-      usaRow = mapUSA[base];
-    }
+    const usdRowCEDEAR = mapARSUSD[sym + "D"]; // CEDEAR USD (ticker con D)
+    let usaRow = findUSA(mapUSA, sym);         // acción USA (USD)
 
-    const precioUSA          = usaRow ? Number(usaRow.c) : null;           // Acción USA (USD)
-    const precioARS          = ar && ar.c != null ? Number(ar.c) : null;   // CEDEAR (ARS)
-    const precioUSDcedear    = usdRow && usdRow.c != null ? Number(usdRow.c) : null; // CEDEAR (USD)
+    const precioUSA           = usaRow ? Number(usaRow.c) : null;             // Acción USA (USD)
+    const precioARS           = ar?.c != null ? Number(ar.c) : null;          // CEDEAR (ARS)
+    const precioUSDcedear     = usdRowCEDEAR?.c != null ? Number(usdRowCEDEAR.c) : null; // CEDEAR (USD)
     const precioCEDEAR_esp_USD = (precioUSA!=null && ratio) ? (precioUSA / ratio) : null; // teórico USD
-    const precioEsperadoARS  = (precioUSA!=null && ratio && CCL) ? (precioUSA * ratio * CCL) : null; // teórico ARS
-    const diffARS = (precioARS!=null && precioEsperadoARS) ? ((precioARS - precioEsperadoARS) / precioEsperadoARS) * 100 : null;
+    const precioEsperadoARS   = (precioCEDEAR_esp_USD!=null && CCL) ? (precioCEDEAR_esp_USD * CCL) : null; // teórico ARS
+
     const diffUSD = (precioUSDcedear!=null && precioCEDEAR_esp_USD) ? ((precioUSDcedear - precioCEDEAR_esp_USD) / precioCEDEAR_esp_USD) * 100 : null;
+    const diffARS = (precioARS!=null && precioEsperadoARS) ? ((precioARS - precioEsperadoARS) / precioEsperadoARS) * 100 : null;
 
     out.push({
       ticker: sym,
@@ -173,8 +170,8 @@ async function loadAll(){
       precioUSDcedear,
       precioCEDEAR_esp_USD,
       precioEsperadoARS,
-      diffARS,
-      diffUSD
+      diffUSD,
+      diffARS
     });
   }
 
@@ -184,7 +181,7 @@ async function loadAll(){
   updateMeta();
 }
 
-/* Render table */
+/* Render */
 function render(){
   const tb = document.getElementById("tbody");
   if (!viewRows.length){
@@ -199,42 +196,41 @@ function render(){
       <td>${fmt(r.precioARS)}</td>
       <td>${fmt(r.precioUSDcedear)}</td>
       <td>${fmt(r.precioCEDEAR_esp_USD)}</td>
+      <td class="${clsVal(r.diffUSD)}">${r.diffUSD==null?'–':(arrow(r.diffUSD)+' '+fmt(r.diffUSD)+'%')}</td>
       <td>${fmt(r.precioEsperadoARS)}</td>
-      <td class="${r.diffARS==null?'muted':clsTrend(r.diffARS)}">${r.diffARS==null?'–':(arrow(r.diffARS)+' '+fmt(r.diffARS)+'%')}</td>
-      <td class="${r.diffUSD==null?'muted':clsTrend(r.diffUSD)}">${r.diffUSD==null?'–':(arrow(r.diffUSD)+' '+fmt(r.diffUSD)+'%')}</td>
+      <td class="${clsVal(r.diffARS)}">${r.diffARS==null?'–':(arrow(r.diffARS)+' '+fmt(r.diffARS)+'%')}</td>
     </tr>
   `).join("");
 }
 
-/* Search filter */
+/* Search */
 document.getElementById("search").addEventListener("input", (e)=>{
   const q = e.target.value.trim().toUpperCase();
   viewRows = rows.filter(r => !q || String(r.ticker).includes(q));
-  applySort(); // mantener el orden actual
+  applySort();
   render();
   updateMeta();
 });
 
 /* Sorting */
+let sortState = { key:"", dir:0 }; // 1 asc, -1 desc
 function applySort(){
   if (!sortState.key || !sortState.dir) return;
-  const {key, dir} = sortState;
   const ths = document.querySelectorAll("thead th");
   ths.forEach(th => { const i = th.querySelector(".sort-ind"); if (i) i.textContent = ""; });
 
-  // find current th and set indicator
-  const th = Array.from(ths).find(t => t.dataset.key === key);
-  if (th) th.querySelector(".sort-ind").textContent = dir > 0 ? "▲" : "▼";
+  const th = Array.from(ths).find(t => t.dataset.key === sortState.key);
+  if (th) th.querySelector(".sort-ind").textContent = sortState.dir > 0 ? "▲" : "▼";
 
   const type = th?.dataset.type || "str";
   viewRows.sort((a,b)=>{
-    const va = a[key], vb = b[key];
+    const va = a[sortState.key], vb = b[sortState.key];
     if (type === "num"){
       const na = (va==null || isNaN(va)) ? -Infinity : Number(va);
       const nb = (vb==null || isNaN(vb)) ? -Infinity : Number(vb);
-      return dir * (na - nb);
+      return sortState.dir * (na - nb);
     } else {
-      return dir * String(va||"").localeCompare(String(vb||""));
+      return sortState.dir * String(va||"").localeCompare(String(vb||""));
     }
   });
 }
@@ -243,18 +239,14 @@ document.querySelectorAll("thead th").forEach(th=>{
   th.addEventListener("click", ()=>{
     const key = th.dataset.key;
     if (!key) return;
-    // toggle dir
     if (sortState.key !== key) sortState = { key, dir: 1 };
-    else sortState.dir = sortState.dir === 1 ? -1 : (sortState.dir === -1 ? 0 : 1); // asc -> desc -> none
+    else sortState.dir = sortState.dir === 1 ? -1 : (sortState.dir === -1 ? 0 : 1);
 
-    // clear indicators if none
     if (sortState.dir === 0){
       sortState.key = "";
       document.querySelectorAll(".sort-ind").forEach(el=> el.textContent="");
-      viewRows = rows.filter(r => {
-        const q = document.getElementById("search").value.trim().toUpperCase();
-        return !q || String(r.ticker).includes(q);
-      });
+      const q = document.getElementById("search").value.trim().toUpperCase();
+      viewRows = rows.filter(r => !q || String(r.ticker).includes(q));
     } else {
       applySort();
     }
@@ -262,18 +254,15 @@ document.querySelectorAll("thead th").forEach(th=>{
   });
 });
 
-/* Meta info */
+/* Meta */
 function updateMeta(){
   const meta = document.getElementById("meta");
-  const total = rows.length;
-  const vis   = viewRows.length;
-  meta.textContent = `Mostrando ${vis} de ${total} CEDEARs • Fuente: data912 (20s), DolarAPI`;
+  meta.textContent = `Mostrando ${viewRows.length} de ${rows.length} CEDEARs • Fuentes: data912 (20s), DolarAPI`;
 }
 
-/* Kickoff */
+/* Init */
 loadAll();
-// refresco suave (no muy frecuente para evitar rate-limits)
-setInterval(loadAll, 120000); // 2 minutos
+setInterval(loadAll, 120000);
 </script>
 
 </body>
