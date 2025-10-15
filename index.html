@@ -13,7 +13,7 @@
       --head:#333; 
       --green:#0a8a0a; 
       --red:#c62828; 
-      --hover:#cce5ff; /* más intenso */
+      --hover:#c0dfff; /* color más notorio */
     }
     html,body { 
       margin:0; padding:0; background:var(--bg); color:var(--fg); 
@@ -117,6 +117,7 @@ async function loadAll(){
   }
   const ratios=ratiosData.ratios||ratiosData;
   const mapRatio=Object.fromEntries(ratios.map(r=>[r.ticker.toUpperCase(),Number(r.ratio)]));
+  const mapTexto=Object.fromEntries(ratios.map(r=>[r.ticker.toUpperCase(),r.texto_ratio]));
   const mapARSUSD=Object.fromEntries(argCedears.map(o=>[o.symbol.toUpperCase(),o]));
   const mapUSA=Object.fromEntries(usaStocks.map(o=>[o.symbol.toUpperCase(),o]));
 
@@ -124,16 +125,46 @@ async function loadAll(){
   for(const [sym,ar] of Object.entries(mapARSUSD)){
     if(sym.endsWith("D"))continue;
     const ratio=mapRatio[sym];if(!ratio)continue;
+    const textoRatio=mapTexto[sym]||"";
     const usdRowCEDEAR=mapARSUSD[sym+"D"];
     const usaRow=findUSA(mapUSA,sym);
     const precioUSA=usaRow?Number(usaRow.c):null;
     const precioARS=ar?.c!=null?Number(ar.c):null;
     const precioUSDcedear=usdRowCEDEAR?.c!=null?Number(usdRowCEDEAR.c):null;
-    const precioCEDEAR_esp_USD=(precioUSA!=null&&ratio)?(precioUSA/ratio):null;
-    const precioEsperadoARS=(precioCEDEAR_esp_USD!=null&&CCL)?(precioCEDEAR_esp_USD*CCL):null;
-    const diffUSD=(precioUSDcedear!=null&&precioCEDEAR_esp_USD)?((precioUSDcedear-precioCEDEAR_esp_USD)/precioCEDEAR_esp_USD)*100:null;
-    const diffARS=(precioARS!=null&&precioEsperadoARS)?((precioARS-precioEsperadoARS)/precioEsperadoARS)*100:null;
-    out.push({ticker:sym,ratio,precioUSA,precioARS,precioUSDcedear,precioCEDEAR_esp_USD,precioEsperadoARS,diffUSD,diffARS});
+
+    // --- NUEVA LÓGICA según tipo de ratio ---
+    let precioCEDEAR_esp_USD=null, precioEsperadoARS=null;
+    if (ratio && precioUSA && CCL) {
+      if (ratio >= 1) {
+        // Ej: 20:1 → dividir
+        precioCEDEAR_esp_USD = precioUSA / ratio;
+      } else {
+        // Ej: 1:3 → multiplicar
+        const inv = 1 / ratio;
+        precioCEDEAR_esp_USD = precioUSA * inv;
+      }
+      precioEsperadoARS = precioCEDEAR_esp_USD * CCL;
+    }
+
+    const diffUSD = (precioUSDcedear!=null && precioCEDEAR_esp_USD)
+      ? ((precioUSDcedear - precioCEDEAR_esp_USD) / precioCEDEAR_esp_USD) * 100
+      : null;
+    const diffARS = (precioARS!=null && precioEsperadoARS)
+      ? ((precioARS - precioEsperadoARS) / precioEsperadoARS) * 100
+      : null;
+
+    out.push({
+      ticker:sym,
+      ratio,
+      textoRatio,
+      precioUSA,
+      precioARS,
+      precioUSDcedear,
+      precioCEDEAR_esp_USD,
+      precioEsperadoARS,
+      diffUSD,
+      diffARS
+    });
   }
   rows=out;viewRows=rows.slice();render();updateMeta();
 }
@@ -144,7 +175,7 @@ function render(){
   tb.innerHTML=viewRows.map(r=>`
     <tr>
       <td class="left">${r.ticker}</td>
-      <td>${r.ratio?`${r.ratio}:1`:"–"}</td>
+      <td>${r.textoRatio || (r.ratio?`${r.ratio}:1`:"–")}</td>
       <td>${r.precioUSA!=null?"US$ "+fmtNum(r.precioUSA):"–"}</td>
       <td>${r.precioARS!=null?"$ "+fmtNum(r.precioARS):"–"}</td>
       <td>${r.precioUSDcedear!=null?"US$ "+fmtNum(r.precioUSDcedear):"–"}</td>
