@@ -92,20 +92,20 @@
 
 <script>
 /* Endpoints */
-const URL_CEDEARS = "https://data912.com/live/arg_cedears"; // CEDEARs ARS y versión D (USD)
-const URL_USA     = "https://data912.com/live/usa_stocks";  // Acción USA (USD), campo c
-const URL_DOLAR   = "https://dolarapi.com/v1/dolares";       // CCL venta
-const URL_RATIOS  = "https://dolarhoy.dev.ar/ratios.json";   // { ticker, ratio }
+const URL_CEDEARS = "https://data912.com/live/arg_cedears";
+const URL_USA     = "https://data912.com/live/usa_stocks";
+const URL_DOLAR   = "https://dolarapi.com/v1/dolares";
+const URL_RATIOS  = "https://dolarhoy.dev.ar/ratios.json";
 
 /* Utils */
 const fmt = (x, d=2) => (x==null || isNaN(x)) ? "–" : Number(x).toFixed(d);
 const arrow = v => v>0 ? "▲" : (v<0 ? "▼" : "");
-const clsVal = v => v==null ? "muted" : (v < 0 ? "underval" : "overval"); // verde si subvaluado, rojo si sobrevaluado
+const clsVal = v => v==null ? "muted" : (v < 0 ? "underval" : "overval");
 
 /* State */
 let rows = [];
 let viewRows = [];
-let sortState = { key:"", dir: 0 }; // 1 asc, -1 desc, 0 none
+let sortState = { key:"", dir: 0 }; // ✅ solo una vez
 let CCL = null;
 
 /* Fetch helper */
@@ -115,7 +115,7 @@ async function j(url){
   try { return JSON.parse(t); } catch(e){ console.error("JSON inválido en", url, e, t.slice(0,200)); return null; }
 }
 
-/* Fuzzy USA symbol (p/ casos con sufijos) */
+/* Fuzzy USA symbol */
 function findUSA(mapUSA, symbol) {
   if (mapUSA[symbol]) return mapUSA[symbol];
   const alt = symbol.replace(/\d+$/,"");
@@ -150,29 +150,19 @@ async function loadAll(){
     const ratio = mapRatio[sym];
     if (!ratio) continue;
 
-    const usdRowCEDEAR = mapARSUSD[sym + "D"]; // CEDEAR USD (ticker con D)
-    let usaRow = findUSA(mapUSA, sym);         // acción USA (USD)
+    const usdRowCEDEAR = mapARSUSD[sym + "D"];
+    let usaRow = findUSA(mapUSA, sym);
 
-    const precioUSA           = usaRow ? Number(usaRow.c) : null;             // Acción USA (USD)
-    const precioARS           = ar?.c != null ? Number(ar.c) : null;          // CEDEAR (ARS)
-    const precioUSDcedear     = usdRowCEDEAR?.c != null ? Number(usdRowCEDEAR.c) : null; // CEDEAR (USD)
-    const precioCEDEAR_esp_USD = (precioUSA!=null && ratio) ? (precioUSA / ratio) : null; // teórico USD
-    const precioEsperadoARS   = (precioCEDEAR_esp_USD!=null && CCL) ? (precioCEDEAR_esp_USD * CCL) : null; // teórico ARS
+    const precioUSA           = usaRow ? Number(usaRow.c) : null;
+    const precioARS           = ar?.c != null ? Number(ar.c) : null;
+    const precioUSDcedear     = usdRowCEDEAR?.c != null ? Number(usdRowCEDEAR.c) : null;
+    const precioCEDEAR_esp_USD = (precioUSA!=null && ratio) ? (precioUSA / ratio) : null;
+    const precioEsperadoARS   = (precioCEDEAR_esp_USD!=null && CCL) ? (precioCEDEAR_esp_USD * CCL) : null;
 
     const diffUSD = (precioUSDcedear!=null && precioCEDEAR_esp_USD) ? ((precioUSDcedear - precioCEDEAR_esp_USD) / precioCEDEAR_esp_USD) * 100 : null;
     const diffARS = (precioARS!=null && precioEsperadoARS) ? ((precioARS - precioEsperadoARS) / precioEsperadoARS) * 100 : null;
 
-    out.push({
-      ticker: sym,
-      ratio,
-      precioUSA,
-      precioARS,
-      precioUSDcedear,
-      precioCEDEAR_esp_USD,
-      precioEsperadoARS,
-      diffUSD,
-      diffARS
-    });
+    out.push({ ticker:sym, ratio, precioUSA, precioARS, precioUSDcedear, precioCEDEAR_esp_USD, precioEsperadoARS, diffUSD, diffARS });
   }
 
   rows = out;
@@ -213,7 +203,6 @@ document.getElementById("search").addEventListener("input", (e)=>{
 });
 
 /* Sorting */
-let sortState = { key:"", dir:0 }; // 1 asc, -1 desc
 function applySort(){
   if (!sortState.key || !sortState.dir) return;
   const ths = document.querySelectorAll("thead th");
